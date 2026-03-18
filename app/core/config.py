@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str | None = None
     OPENAI_MODEL_ID: str = "gpt-4o"
 
+    # Lambda 함수명 (변경 시 .env에서만 수정)
+    LAMBDA_FUNCTION_NAME: str = "action-nutrient-calc"
+
     class Config:
         env_file = ".env"
 

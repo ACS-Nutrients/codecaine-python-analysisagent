@@ -5,6 +5,9 @@ LLM_PROVIDER 환경변수로 LLM 제공자 전환 가능.
   - LLM_PROVIDER=bedrock    → AWS Bedrock 사용 (운영)
   - LLM_PROVIDER=anthropic  → Anthropic API 직접 사용
   - LLM_PROVIDER=openai     → OpenAI API 사용 (테스트)
+
+products 데이터는 App이 DB 조회 후 payload로 전달.
+DB 연결 정보가 변경되어도 코드 수정 없이 App의 .env만 변경하면 됨.
 """
 
 import json
@@ -55,9 +58,10 @@ SYSTEM_PROMPT_STEP1 = """당신은 영양 전문가 AI입니다.
 }"""
 
 SYSTEM_PROMPT_STEP3 = """당신은 영양제 추천 전문가 AI입니다.
-제공된 영양소 갭 데이터를 바탕으로 최적의 영양제를 추천합니다.
+사용자의 영양소 갭 데이터와 제공된 영양제 목록을 바탕으로 최적의 영양제를 추천합니다.
 
 추천 기준:
+- 제공된 영양제 목록에서만 추천 (임의로 만들어내지 말 것)
 - 부족한 영양소 커버율 높은 제품 우선
 - serving_per_day 낮을수록 우선 (복용 편의성)
 - max_amount 초과 위험 제품 하위 순위
@@ -84,7 +88,6 @@ class AnalysisAgent:
         session = boto3.Session(region_name=settings.AWS_REGION)
         self.lambda_client = session.client("lambda")
 
-        # LLM 클라이언트 초기화
         if settings.LLM_PROVIDER == "openai":
             from openai import OpenAI
             self.llm_client = OpenAI(api_key=settings.OPENAI_API_KEY)
@@ -123,7 +126,7 @@ class AnalysisAgent:
         logger.info(f"[{req.cognito_id}] Step 3 시작")
         step3_raw = self._call_llm(
             system=SYSTEM_PROMPT_STEP3,
-            user=self._build_step3_prompt(gaps),
+            user=self._build_step3_prompt(gaps, req.products or []),
         )
         step3_data      = self._parse_json(step3_raw)
         recommendations = step3_data.get("recommendations", [])
@@ -160,7 +163,7 @@ class AnalysisAgent:
                 {"role": "user",   "content": user},
             ],
             max_tokens=2048,
-            response_format={"type": "json_object"},  # JSON 모드 강제
+            response_format={"type": "json_object"},
         )
         return response.choices[0].message.content
 
@@ -204,7 +207,7 @@ class AnalysisAgent:
             "unit_cache":          unit_cache,
         }
         response = self.lambda_client.invoke(
-            FunctionName="action-nutrient-calc",
+            FunctionName=settings.LAMBDA_FUNCTION_NAME,
             InvocationType="RequestResponse",
             Payload=json.dumps(payload),
         )
@@ -235,13 +238,29 @@ class AnalysisAgent:
             )
         return "\n\n".join(parts)
 
-    def _build_step3_prompt(self, gaps: list[dict]) -> str:
+    def _build_step3_prompt(self, gaps: list[dict], products: list[dict]) -> str:
+        """
+        gaps + products 데이터를 LLM에 전달.
+        products는 App이 DB에서 조회해서 payload로 넘긴 데이터.
+        DB가 바뀌어도 이 코드는 수정 불필요 — App의 .env만 변경하면 됨.
+        """
         active_gaps = [g for g in gaps if float(g.get("gap_amount", 0)) > 0]
-        return (
-            "아래 영양소 갭을 채울 수 있는 최적의 영양제를 추천하세요.\n\n"
-            "영양소 갭 목록:\n"
-            + json.dumps(active_gaps, ensure_ascii=False, indent=2)
-        )
+
+        parts = [
+            "아래 영양소 갭을 채울 수 있는 최적의 영양제를 추천하세요.",
+            "\n영양소 갭 목록:\n"
+            + json.dumps(active_gaps, ensure_ascii=False, indent=2),
+        ]
+
+        if products:
+            parts.append(
+                "\n추천 가능한 영양제 목록 (이 목록에서만 추천하세요):\n"
+                + json.dumps(products, ensure_ascii=False, indent=2)
+            )
+        else:
+            parts.append("\n※ 영양제 목록이 제공되지 않았습니다. 추천을 건너뜁니다.")
+
+        return "\n".join(parts)
 
     @staticmethod
     def _parse_json(text: str) -> dict:

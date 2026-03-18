@@ -12,16 +12,19 @@ class AnalysisRequest(BaseModel):
     medication_info: list[dict] | None = Field(None, description="의약품 투약 정보")
     current_supplements: list[dict] | None = Field(
         None,
-        description="현재 복용 영양제 (DB 복제본에서 App이 조회 후 전달)"
+        description="현재 복용 영양제 (App이 DB 조회 후 전달)"
     )
     unit_cache: dict | None = Field(
         None,
-        description="단위 변환 테이블 (App이 DB에서 조회 후 전달)"
+        description="단위 변환 테이블 (App이 unit_convertor 테이블 전체 조회 후 전달)"
+    )
+    products: list[dict] | None = Field(
+        None,
+        description="추천 후보 영양제 목록 (App이 products + product_nutrients 조회 후 전달)"
     )
 
 
 # ── AgentCore /invocations 응답 ──────────────────────────────────
-# App이 이 응답을 받아서 각 step 결과를 별도 저장 API로 DB에 저장
 
 class RequiredNutrient(BaseModel):
     name_ko: str
@@ -67,7 +70,7 @@ class Step3Result(BaseModel):
 class AnalysisResponse(BaseModel):
     """
     AgentCore Runtime → App 최종 응답.
-    App은 이 응답을 받아서 별도 저장 API를 호출하여 RDS에 저장.
+    App은 이 응답을 받아서 RDS에 저장.
     """
     cognito_id: str
     step1: Step1Result
