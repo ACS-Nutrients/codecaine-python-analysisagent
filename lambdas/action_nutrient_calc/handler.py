@@ -1,21 +1,11 @@
 """
 Lambda: action_nutrient_calc
 
-Bedrock AgentCore 컨테이너에서 직접 invoke하는 Lambda.
-DB 접근 없음 — VPC 설정 불필요.
-
-입력 (analysis_agent.py에서 직접 호출):
-{
-  "cognito_id": "...",
-  "required_nutrients":  [{ name_ko, name_en, rda_amount, unit, reason }],
-  "current_supplements": [{ product_name, serving_per_day, ingredients: [{name, amount}] }],
-  "unit_cache":          { "IU": "0.000025", "µg": "0.001" }
-}
-
-출력:
-{
-  "gaps": [{ nutrient_id, name_ko, name_en, unit, current_amount, gap_amount, rda_amount }]
-}
+단위 변환 로직:
+  mg  → 그대로
+  mcg → unit_convertor에서 'mcg' 키로 factor 조회 (0.001)
+  IU  → unit_convertor에서 영양소 이름(name_ko)으로 factor 조회
+         예: 비타민D → 0.000025, 비타민A → 0.000030
 """
 
 import json
@@ -28,14 +18,42 @@ logger.setLevel(logging.INFO)
 MG_UNITS = {"mg", "MG"}
 
 
-def to_mg(amount: Decimal, unit: str | None, unit_cache: dict) -> Decimal:
+def to_mg(
+    amount: Decimal,
+    unit: str | None,
+    unit_cache: dict,
+    nutrient_name_ko: str = "",
+) -> Decimal:
+    """
+    주어진 양을 mg 기준으로 변환.
+
+    unit == 'mg'  → 그대로
+    unit == 'mcg' → unit_cache['mcg'] (0.001) 적용
+    unit == 'IU'  → unit_cache[nutrient_name_ko] 로 영양소별 factor 조회
+                    예: 비타민D → 0.000025, 비타민A → 0.000030
+    """
     if not unit or unit in MG_UNITS:
         return amount
-    factor = unit_cache.get(unit)
-    if factor is None:
-        logger.warning(f"단위 변환 정보 없음: '{unit}' — 변환 없이 사용")
-        return amount
-    return amount * factor
+
+    if unit.lower() in ('mcg', 'µg', 'μg'):
+        factor = unit_cache.get('mcg')
+        if factor is None:
+            logger.warning("unit_convertor에 'mcg' 키 없음 — × 0.001 기본값 사용")
+            factor = Decimal('0.001')
+        return amount * factor
+
+    if unit == 'IU':
+        # 영양소 이름으로 factor 조회 (한글/영문 둘 다 시도)
+        factor = unit_cache.get(nutrient_name_ko)
+        if factor is None:
+            logger.warning(
+                f"unit_convertor에 '{nutrient_name_ko}' IU 변환 factor 없음 — 변환 없이 사용"
+            )
+            return amount
+        return amount * factor
+
+    logger.warning(f"알 수 없는 단위: '{unit}' — 변환 없이 사용")
+    return amount
 
 
 def build_intake_map(current_supplements: list[dict]) -> dict[str, Decimal]:
@@ -54,6 +72,20 @@ def build_intake_map(current_supplements: list[dict]) -> dict[str, Decimal]:
 
 
 def lambda_handler(event: dict, context) -> dict:
+    """
+    입력:
+      cognito_id, required_nutrients, current_supplements, unit_cache
+
+    unit_cache 형식:
+      {
+        "mcg":   "0.001",
+        "비타민D": "0.000025",
+        "비타민A": "0.000030",
+        "비타민E": "0.00067",
+        ...
+      }
+      → App이 unit_convertor 테이블 전체를 조회해서 전달
+    """
     logger.info(f"수신: {json.dumps(event)[:300]}")
 
     cognito_id          = event["cognito_id"]
@@ -72,14 +104,16 @@ def lambda_handler(event: dict, context) -> dict:
         req_rda  = Decimal(str(req["rda_amount"]))
 
         raw_current = intake_map.get(name_ko, Decimal("0"))
-        current_mg  = to_mg(raw_current, req_unit, unit_cache)
-        rda_mg      = to_mg(req_rda, req_unit, unit_cache)
+
+        # IU 변환 시 영양소 이름으로 factor 조회
+        current_mg = to_mg(raw_current, req_unit, unit_cache, name_ko)
+        rda_mg     = to_mg(req_rda,     req_unit, unit_cache, name_ko)
 
         gap_mg = max(Decimal("0"), rda_mg - current_mg)
         gap_mg = gap_mg.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
 
         gaps.append({
-            "nutrient_id":    req.get("nutrient_id"),   # App DB에서 매핑
+            "nutrient_id":    req.get("nutrient_id"),
             "name_ko":        name_ko,
             "name_en":        req.get("name_en"),
             "unit":           "mg",
@@ -88,6 +122,9 @@ def lambda_handler(event: dict, context) -> dict:
             "rda_amount":     str(rda_mg.quantize(Decimal("0.0001"))),
         })
 
-        logger.info(f"[갭] {name_ko}: 현재={current_mg}mg | RDA={rda_mg}mg | 갭={gap_mg}mg")
+        logger.info(
+            f"[갭] {name_ko} (단위:{req_unit}): "
+            f"현재={current_mg}mg | RDA={rda_mg}mg | 갭={gap_mg}mg"
+        )
 
     return {"gaps": gaps}
