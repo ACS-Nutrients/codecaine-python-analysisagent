@@ -17,42 +17,30 @@ logger.setLevel(logging.INFO)
 
 MG_UNITS = {"mg", "MG"}
 
-
-def to_mg(
-    amount: Decimal,
-    unit: str | None,
-    unit_cache: dict,
-    nutrient_name_ko: str = "",
-) -> Decimal:
-    """
-    주어진 양을 mg 기준으로 변환.
-
-    unit == 'mg'  → 그대로
-    unit == 'mcg' → unit_cache['mcg'] (0.001) 적용
-    unit == 'IU'  → unit_cache[nutrient_name_ko] 로 영양소별 factor 조회
-                    예: 비타민D → 0.000025, 비타민A → 0.000030
-    """
+# handler.py의 to_mg() 함수 수정
+def to_mg(amount, unit, unit_cache, nutrient_name_ko=""):
     if not unit or unit in MG_UNITS:
         return amount
 
     if unit.lower() in ('mcg', 'µg', 'μg'):
         factor = unit_cache.get('mcg')
         if factor is None:
-            logger.warning("unit_convertor에 'mcg' 키 없음 — × 0.001 기본값 사용")
             factor = Decimal('0.001')
         return amount * factor
 
     if unit == 'IU':
-        # 영양소 이름으로 factor 조회 (한글/영문 둘 다 시도)
-        factor = unit_cache.get(nutrient_name_ko)
+        # 띄어쓰기 제거 후 조회 ("비타민 D" → "비타민D")
+        name_normalized = nutrient_name_ko.replace(" ", "")
+        factor = (
+            unit_cache.get(nutrient_name_ko) or
+            unit_cache.get(name_normalized)
+        )
         if factor is None:
-            logger.warning(
-                f"unit_convertor에 '{nutrient_name_ko}' IU 변환 factor 없음 — 변환 없이 사용"
-            )
+            logger.warning(f"unit_convertor에 '{nutrient_name_ko}' IU 변환 factor 없음")
             return amount
         return amount * factor
 
-    logger.warning(f"알 수 없는 단위: '{unit}' — 변환 없이 사용")
+    logger.warning(f"알 수 없는 단위: '{unit}'")
     return amount
 
 
