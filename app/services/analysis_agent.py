@@ -1,20 +1,17 @@
 """
 analysis_agent.py
 
-AgentCore Runtime 컨테이너 안에서 실행되는 Agent 로직.
-DB 접근 없음 — 모든 데이터는 App이 요청 시 payload로 전달.
+LLM_PROVIDER 환경변수로 LLM 제공자 전환 가능.
+  - LLM_PROVIDER=bedrock    → AWS Bedrock 사용 (운영)
+  - LLM_PROVIDER=anthropic  → Anthropic API 직접 사용
+  - LLM_PROVIDER=openai     → OpenAI API 사용 (테스트)
 
-흐름:
-  Step 1: Bedrock 직접 호출 → 필요 영양소 도출
-  Step 2: Lambda 호출 → 갭 계산 (current_supplements + unit_cache 전달)
-  Step 3: Bedrock 직접 호출 → gaps 받아 추천 생성
-  → 최종 { step1, step2, step3 } 반환
-  → App이 받아서 별도 저장 API로 RDS 저장
+products 데이터는 App이 DB 조회 후 payload로 전달.
+DB 연결 정보가 변경되어도 코드 수정 없이 App의 .env만 변경하면 됨.
 """
 
 import json
 import logging
-from decimal import Decimal
 
 import boto3
 
@@ -61,9 +58,10 @@ SYSTEM_PROMPT_STEP1 = """당신은 영양 전문가 AI입니다.
 }"""
 
 SYSTEM_PROMPT_STEP3 = """당신은 영양제 추천 전문가 AI입니다.
-제공된 영양소 갭 데이터를 바탕으로 최적의 영양제를 추천합니다.
+사용자의 영양소 갭 데이터와 제공된 영양제 목록을 바탕으로 최적의 영양제를 추천합니다.
 
 추천 기준:
+- 제공된 영양제 목록에서만 추천 (임의로 만들어내지 말 것)
 - 부족한 영양소 커버율 높은 제품 우선
 - serving_per_day 낮을수록 우선 (복용 편의성)
 - max_amount 초과 위험 제품 하위 순위
@@ -88,17 +86,28 @@ SYSTEM_PROMPT_STEP3 = """당신은 영양제 추천 전문가 AI입니다.
 class AnalysisAgent:
     def __init__(self):
         session = boto3.Session(region_name=settings.AWS_REGION)
-        self.bedrock = session.client("bedrock-runtime")
         self.lambda_client = session.client("lambda")
+
+        if settings.LLM_PROVIDER == "openai":
+            from openai import OpenAI
+            self.llm_client = OpenAI(api_key=settings.OPENAI_API_KEY)
+            logger.info("LLM Provider: OpenAI")
+        elif settings.LLM_PROVIDER == "anthropic":
+            import anthropic
+            self.llm_client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+            logger.info("LLM Provider: Anthropic API")
+        else:
+            self.llm_client = session.client("bedrock-runtime")
+            logger.info("LLM Provider: AWS Bedrock")
 
     async def run(self, req: AnalysisRequest) -> AnalysisResponse:
         # ── Step 1: LLM 분석 ─────────────────────────────────────
         logger.info(f"[{req.cognito_id}] Step 1 시작")
-        step1_raw = self._call_bedrock(
+        step1_raw = self._call_llm(
             system=SYSTEM_PROMPT_STEP1,
             user=self._build_step1_prompt(req),
         )
-        step1_data = self._parse_json(step1_raw)
+        step1_data         = self._parse_json(step1_raw)
         required_nutrients = step1_data.get("required_nutrients", [])
         summary            = step1_data.get("summary", {})
         logger.info(f"[{req.cognito_id}] Step 1 완료 — 영양소 {len(required_nutrients)}개")
@@ -115,11 +124,11 @@ class AnalysisAgent:
 
         # ── Step 3: LLM 추천 ─────────────────────────────────────
         logger.info(f"[{req.cognito_id}] Step 3 시작")
-        step3_raw = self._call_bedrock(
+        step3_raw = self._call_llm(
             system=SYSTEM_PROMPT_STEP3,
-            user=self._build_step3_prompt(gaps),
+            user=self._build_step3_prompt(gaps, req.products or []),
         )
-        step3_data    = self._parse_json(step3_raw)
+        step3_data      = self._parse_json(step3_raw)
         recommendations = step3_data.get("recommendations", [])
         logger.info(f"[{req.cognito_id}] Step 3 완료 — 추천 {len(recommendations)}개")
 
@@ -137,10 +146,38 @@ class AnalysisAgent:
             ),
         )
 
-    # ── Bedrock 직접 호출 ─────────────────────────────────────────
+    # ── LLM 호출 (provider 분기) ──────────────────────────────────
+
+    def _call_llm(self, system: str, user: str) -> str:
+        if settings.LLM_PROVIDER == "openai":
+            return self._call_openai(system, user)
+        elif settings.LLM_PROVIDER == "anthropic":
+            return self._call_anthropic(system, user)
+        return self._call_bedrock(system, user)
+
+    def _call_openai(self, system: str, user: str) -> str:
+        response = self.llm_client.chat.completions.create(
+            model=settings.OPENAI_MODEL_ID,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user",   "content": user},
+            ],
+            max_tokens=2048,
+            response_format={"type": "json_object"},
+        )
+        return response.choices[0].message.content
+
+    def _call_anthropic(self, system: str, user: str) -> str:
+        message = self.llm_client.messages.create(
+            model=settings.ANTHROPIC_MODEL_ID,
+            max_tokens=2048,
+            system=system,
+            messages=[{"role": "user", "content": user}],
+        )
+        return message.content[0].text
 
     def _call_bedrock(self, system: str, user: str) -> str:
-        response = self.bedrock.invoke_model(
+        response = self.llm_client.invoke_model(
             modelId=settings.BEDROCK_MODEL_ID,
             body=json.dumps({
                 "anthropic_version": "bedrock-2023-05-31",
@@ -163,21 +200,18 @@ class AnalysisAgent:
         current_supplements: list[dict],
         unit_cache: dict,
     ) -> list[dict]:
-        """
-        action_nutrient_calc Lambda 호출.
-        DB 접근 없음 — 필요한 데이터를 모두 payload로 전달.
-        """
         payload = {
             "cognito_id":          cognito_id,
             "required_nutrients":  required_nutrients,
             "current_supplements": current_supplements,
             "unit_cache":          unit_cache,
         }
+        # analysis_agent.py _call_lambda() 수정
         response = self.lambda_client.invoke(
-            FunctionName="action-nutrient-calc",
-            InvocationType="RequestResponse",
-            Payload=json.dumps(payload),
-        )
+        FunctionName=settings.LAMBDA_FUNCTION_NAME,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(payload, ensure_ascii=False).encode("utf-8"),  # 수정
+)
         result = json.loads(response["Payload"].read())
         return result.get("gaps", [])
 
@@ -203,15 +237,48 @@ class AnalysisAgent:
                 "현재 복용 영양제:\n"
                 + json.dumps(req.current_supplements, ensure_ascii=False, indent=2)
             )
+
+        # 챗봇 재분석 시 이전 분석 맥락 포함
+        if req.previous_analysis:
+            parts.append(
+                "이전 분석 결과 (재분석 시 참고):\n"
+                + json.dumps(req.previous_analysis, ensure_ascii=False, indent=2)
+            )
+
+        # TODO: chat_history 형식 확정 후 파싱 방식 수정 필요
+        # 현재는 {"role": "user"|"assistant", "content": "..."} 형식으로 가정
+        if req.chat_history:
+            history_text = "\n".join(
+                f"{msg.get('role', 'unknown')}: {msg.get('content', '')}"
+                for msg in req.chat_history
+            )
+            parts.append(f"챗봇 대화 내역:\n{history_text}")
+
         return "\n\n".join(parts)
 
-    def _build_step3_prompt(self, gaps: list[dict]) -> str:
+    def _build_step3_prompt(self, gaps: list[dict], products: list[dict]) -> str:
+        """
+        gaps + products 데이터를 LLM에 전달.
+        products는 App이 DB에서 조회해서 payload로 넘긴 데이터.
+        DB가 바뀌어도 이 코드는 수정 불필요 — App의 .env만 변경하면 됨.
+        """
         active_gaps = [g for g in gaps if float(g.get("gap_amount", 0)) > 0]
-        return (
-            "아래 영양소 갭을 채울 수 있는 최적의 영양제를 추천하세요.\n\n"
-            "영양소 갭 목록:\n"
-            + json.dumps(active_gaps, ensure_ascii=False, indent=2)
-        )
+
+        parts = [
+            "아래 영양소 갭을 채울 수 있는 최적의 영양제를 추천하세요.",
+            "\n영양소 갭 목록:\n"
+            + json.dumps(active_gaps, ensure_ascii=False, indent=2),
+        ]
+
+        if products:
+            parts.append(
+                "\n추천 가능한 영양제 목록 (이 목록에서만 추천하세요):\n"
+                + json.dumps(products, ensure_ascii=False, indent=2)
+            )
+        else:
+            parts.append("\n※ 영양제 목록이 제공되지 않았습니다. 추천을 건너뜁니다.")
+
+        return "\n".join(parts)
 
     @staticmethod
     def _parse_json(text: str) -> dict:

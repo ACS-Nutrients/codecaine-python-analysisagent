@@ -112,8 +112,10 @@ class AgentCoreClient:
         medication_info: list[dict] | None = None,
     ) -> dict:
         # 1. DB에서 필요한 데이터 조회
+        # DB 연결 정보가 바뀌어도 App의 .env만 변경하면 됨 (코드 수정 불필요)
         current_supplements = await self._get_supplements(cognito_id)
         unit_cache          = await self._get_unit_cache()
+        products            = await self._get_products()
 
         # 2. AgentCore Runtime 호출
         payload = {
@@ -123,6 +125,7 @@ class AgentCoreClient:
             "medication_info":     medication_info,
             "current_supplements": current_supplements,
             "unit_cache":          unit_cache,
+            "products":            products,   # Step 3 추천에 사용
         }
 
         response = self.client.invoke_agent_runtime(
@@ -185,12 +188,45 @@ class AgentCoreClient:
         ]
 
     async def _get_unit_cache(self) -> dict:
-        """unit_convertor 테이블 → { "IU": "0.000025", "µg": "0.001" }"""
+        """unit_convertor 테이블 전체 조회 → { "비타민D": "0.000025", "mcg": "0.001", ... }"""
         result = await self.db.execute(select(UnitConvertor))
         return {
             row.vitamin_name: str(row.convert_unit)
             for row in result.scalars().all()
         }
+
+    async def _get_products(self) -> list[dict]:
+        """
+        products + product_nutrients 조회 → Step 3 추천 LLM에 전달.
+        DB가 바뀌어도 App의 .env만 변경하면 되고 이 코드는 수정 불필요.
+        """
+        from models import Product, ProductNutrient, Nutrient
+        result = await self.db.execute(
+            select(Product)
+            .options(
+                selectinload(Product.nutrients).selectinload(ProductNutrient.nutrient)
+            )
+        )
+        products = result.scalars().all()
+        return [
+            {
+                "product_id":    p.product_id,
+                "product_name":  p.product_name,
+                "product_brand": p.product_brand,
+                "serving_per_day": p.serving_per_day,
+                "nutrients": [
+                    {
+                        "name_ko":         pn.nutrient.name_ko if pn.nutrient else None,
+                        "name_en":         pn.nutrient.name_en if pn.nutrient else None,
+                        "unit":            pn.unit,
+                        "amount_per_day":  pn.amount_per_day,
+                    }
+                    for pn in p.nutrients
+                    if pn.amount_per_day and pn.amount_per_day > 0
+                ],
+            }
+            for p in products
+        ]
 
     # ── DB 저장 ─────────────────────────────────────────────────
 
