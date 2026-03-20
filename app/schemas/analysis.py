@@ -23,6 +23,22 @@ class AnalysisRequest(BaseModel):
         description="추천 후보 영양제 목록 (App이 products + product_nutrients 조회 후 전달)"
     )
 
+    # TODO: chat_history 실제 형식은 챗봇 서비스 구현 후 확정 필요
+    # 현재 가정: [{"role": "user"|"assistant", "content": "..."}]
+    # 오케스트레이션 agent가 챗봇 재분석 호출 시 전달
+    chat_history: list[dict] | None = Field(
+        None,
+        description="챗봇 대화 내역 — 형식 미확정, 챗봇 서비스 구현 후 수정 필요"
+    )
+
+    # 이전 분석 결과 맥락 (챗봇 재분석 시 참고용)
+    # 오케스트레이션 agent가 "이전에 뭘 추천했는지" 알려주기 위해 전달
+    # 형식: {"step1": {required_nutrients, summary}, "step2": {gaps}, "step3": {recommendations}}
+    previous_analysis: dict | None = Field(
+        None,
+        description="이전 분석 결과 (step1/2/3) — 챗봇 재분석 시 맥락 유지용"
+    )
+
 
 # ── AgentCore /invocations 응답 ──────────────────────────────────
 
