@@ -7,11 +7,11 @@ on:
   workflow_dispatch:  # 수동 실행
 
   env:
-  AWS_REGION:           ap-northeast-2
-  AWS_ACCOUNT_ID:       620758375333
-  ECR_REPOSITORY:       cdci-analysis-agentcore
-  AGENTCORE_RUNTIME_ID: analysis_agent-4z2MKdDVt8
-  AGENTCORE_ROLE_ARN:   arn:aws:iam::620758375333:role/agentcore-runtime-role
+    AWS_REGION:           ap-northeast-2
+    AWS_ACCOUNT_ID:       620758375333
+    ECR_REPOSITORY:       cdci-analysis-agentcore
+    AGENTCORE_RUNTIME_ID: analysis_agent-4z2MKdDVt8
+    AGENTCORE_ROLE_ARN:   arn:aws:iam::620758375333:role/agentcore-runtime-role
 
 jobs:
   # ── 1. 테스트 ────────────────────────────────────────────────────
