@@ -10,8 +10,8 @@ def test_to_mg_mg():
     assert to_mg(Decimal("500"), "mg", {}) == Decimal("500")
 
 def test_to_mg_iu():
-    cache = {"IU": Decimal("0.000025")}
-    assert to_mg(Decimal("800"), "IU", cache) == Decimal("0.02")
+    cache = {"비타민D": Decimal("0.000025")}
+    assert to_mg(Decimal("800"), "IU", cache, "비타민D") == Decimal("0.02")
 
 def test_to_mg_unknown():
     assert to_mg(Decimal("100"), "xyz", {}) == Decimal("100")
