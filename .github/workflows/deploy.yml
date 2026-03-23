@@ -8,10 +8,10 @@ on:
 
 env:
   AWS_REGION:           ap-northeast-2
-  AWS_ACCOUNT_ID:       070238434919
+  AWS_ACCOUNT_ID:       620758375333
   ECR_REPOSITORY:       analysis-agent
   AGENTCORE_RUNTIME_ID: analysis_agent-bA2YOVDhUj
-  AGENTCORE_ROLE_ARN:   arn:aws:iam::070238434919:role/agentcore-runtime-role
+  AGENTCORE_ROLE_ARN:   arn:aws:iam::620758375333:role/agentcore-runtime-role
 
 jobs:
   # ── 1. 테스트 ────────────────────────────────────────────────────
