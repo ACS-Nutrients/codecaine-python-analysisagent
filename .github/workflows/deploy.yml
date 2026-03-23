@@ -6,7 +6,7 @@ on:
       - deploy        # deploy 브랜치에 merge(push) 시 자동 실행
   workflow_dispatch:  # 수동 실행
 
-env:
+  env:
   AWS_REGION:           ap-northeast-2
   AWS_ACCOUNT_ID:       620758375333
   ECR_REPOSITORY:       cdci-analysis-agentcore
