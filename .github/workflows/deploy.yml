@@ -9,8 +9,8 @@ on:
 env:
   AWS_REGION:           ap-northeast-2
   AWS_ACCOUNT_ID:       620758375333
-  ECR_REPOSITORY:       analysis-agent
-  AGENTCORE_RUNTIME_ID: analysis_agent-bA2YOVDhUj
+  ECR_REPOSITORY:       cdci-analysis-agentcore
+  AGENTCORE_RUNTIME_ID: analysis_agent-4z2MKdDVt8
   AGENTCORE_ROLE_ARN:   arn:aws:iam::620758375333:role/agentcore-runtime-role
 
 jobs:
