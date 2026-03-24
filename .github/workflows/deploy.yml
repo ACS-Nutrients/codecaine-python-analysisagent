@@ -3,7 +3,7 @@ name: Deploy Analysis Agent
 on:
   push:
     branches:
-      - deploy-test
+      - deploy
 
 env:
   AWS_REGION:     ap-northeast-2
@@ -42,7 +42,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN2 }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
