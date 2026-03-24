@@ -59,9 +59,12 @@ jobs:
         run: |
           IMAGE_TAG=$(date +%s)
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          CACHE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:cache
           docker buildx build \
             --platform linux/arm64 \
             --provenance=false \
+            --cache-from type=registry,ref=$CACHE_URI \
+            --cache-to   type=registry,ref=$CACHE_URI,mode=max \
             --push \
             -t $IMAGE_URI \
             .
