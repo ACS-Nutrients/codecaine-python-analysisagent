@@ -61,9 +61,9 @@ jobs:
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker buildx build \
             --platform linux/arm64 \
+            --provenance=false \
             --push \
             -t $IMAGE_URI \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
             .
           echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
 
