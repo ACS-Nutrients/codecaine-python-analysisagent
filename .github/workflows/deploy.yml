@@ -3,18 +3,14 @@ name: Deploy Analysis Agent
 on:
   push:
     branches:
-      - deploy        # deploy 브랜치에 merge(push) 시 자동 실행
-  workflow_dispatch:  # 수동 실행
+      - deploy
+  workflow_dispatch:
 
 env:
-  AWS_REGION:           ap-northeast-2
-  AWS_ACCOUNT_ID:       620758375333
-  ECR_REPOSITORY:       cdci-analysis-agentcore
-  AGENTCORE_RUNTIME_ID: analysis_agent-4z2MKdDVt8
-  AGENTCORE_ROLE_ARN:   arn:aws:iam::620758375333:role/agentcore-runtime-role
+  AWS_REGION:     ap-northeast-2
+  ECR_REPOSITORY: cdci-prd-analysis-agent
 
 jobs:
-  # ── 1. 테스트 ────────────────────────────────────────────────────
   test:
     name: Unit Test
     runs-on: ubuntu-latest
@@ -24,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install -r requirements.txt pytest
@@ -32,8 +28,6 @@ jobs:
       - name: Run tests
         run: pytest tests/ -v
 
-  # ── 2. Docker 빌드 & ECR 푸시 ────────────────────────────────────
-  # Lambda는 Terraform에서 관리 (인프라 배포 시점에 함께 배포)
   build-and-push:
     name: Build & Push ECR
     needs: test
@@ -41,14 +35,12 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
     outputs:
       image_uri: ${{ steps.build.outputs.image_uri }}
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials (OIDC)
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
@@ -58,27 +50,24 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set up Docker Buildx (arm64)
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build & Push
         id: build
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
         run: |
+          IMAGE_TAG=$(date +%s)
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
           docker buildx build \
             --platform linux/arm64 \
+            --provenance=false \
             --push \
             -t $IMAGE_URI \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
             .
-
           echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
 
-  # ── 3. AgentCore Runtime 업데이트 ────────────────────────────────
   deploy-agentcore:
     name: Deploy AgentCore Runtime
     needs: build-and-push
@@ -86,11 +75,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (OIDC)
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
@@ -100,45 +86,29 @@ jobs:
         env:
           IMAGE_URI: ${{ needs.build-and-push.outputs.image_uri }}
         run: |
+          NETWORK_CONFIG=$(aws bedrock-agentcore-control get-agent-runtime \
+            --agent-runtime-id ${{ secrets.AGENTCORE_RUNTIME_ID }} \
+            --region $AWS_REGION \
+            --query 'networkConfiguration' \
+            --output json)
+
           aws bedrock-agentcore-control update-agent-runtime \
-            --agent-runtime-id $AGENTCORE_RUNTIME_ID \
+            --agent-runtime-id ${{ secrets.AGENTCORE_RUNTIME_ID }} \
             --agent-runtime-artifact "{\"containerConfiguration\": {\"containerUri\": \"$IMAGE_URI\"}}" \
-            --role-arn $AGENTCORE_ROLE_ARN \
+            --role-arn ${{ secrets.AGENTCORE_ROLE_ARN }} \
+            --network-configuration "$NETWORK_CONFIG" \
+            --environment-variables '{"LLM_PROVIDER":"bedrock"}' \
             --region $AWS_REGION
 
       - name: Wait for READY
         run: |
-          echo "AgentCore Runtime READY 대기 중..."
-          for i in {1..30}; do
+          for i in {1..60}; do
             STATUS=$(aws bedrock-agentcore-control get-agent-runtime \
-              --agent-runtime-id $AGENTCORE_RUNTIME_ID \
+              --agent-runtime-id ${{ secrets.AGENTCORE_RUNTIME_ID }} \
               --region $AWS_REGION \
               --query 'status' --output text)
-            echo "  상태: $STATUS"
-            if [ "$STATUS" = "READY" ]; then
-              echo "✅ READY 확인"
-              exit 0
-            elif [[ "$STATUS" == *FAILED* ]]; then
-              echo "❌ 배포 실패: $STATUS"
-              exit 1
-            fi
+            [ "$STATUS" = "READY" ] && exit 0
+            [[ "$STATUS" == *FAILED* ]] && exit 1
             sleep 10
           done
-          echo "❌ READY 타임아웃"
           exit 1
-
-  # ── 4. 결과 알림 ─────────────────────────────────────────────────
-  notify:
-    name: Notify
-    needs: deploy-agentcore
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Result
-        run: |
-          if [ "${{ needs.deploy-agentcore.result }}" == "success" ]; then
-            echo "✅ Analysis Agent 배포 성공 (commit: ${{ github.sha }})"
-          else
-            echo "❌ Analysis Agent 배포 실패"
-            exit 1
-          fi
