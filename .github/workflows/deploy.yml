@@ -50,26 +50,31 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Set image tag
+        id: tag
+        run: echo "tag=$(date +%s)" >> $GITHUB_OUTPUT
+
       - name: Build & Push
         id: build
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          IMAGE_TAG=$(date +%s)
-          IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          CACHE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:cache
-          docker buildx build \
-            --platform linux/arm64 \
-            --provenance=false \
-            --cache-from type=registry,ref=$CACHE_URI \
-            --cache-to   type=registry,ref=$CACHE_URI,mode=max \
-            --push \
-            -t $IMAGE_URI \
-            .
-          echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          provenance: false
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.tag.outputs.tag }}
+          cache-from: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:cache
+          cache-to: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:cache,mode=max
+
+      - name: Set image URI output
+        run: echo "image_uri=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.tag.outputs.tag }}" >> $GITHUB_OUTPUT
+        id: set-uri
 
   deploy-agentcore:
     name: Deploy AgentCore Runtime
