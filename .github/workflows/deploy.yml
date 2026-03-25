@@ -109,7 +109,7 @@ jobs:
             --agent-runtime-artifact "{\"containerConfiguration\": {\"containerUri\": \"$IMAGE_URI\"}}" \
             --role-arn ${{ secrets.AGENTCORE_ROLE_ARN }} \
             --network-configuration "$NETWORK_CONFIG" \
-            --environment-variables "{\"LLM_PROVIDER\":\"bedrock\",\"BEDROCK_MODEL_ID\":\"${{ secrets.BEDROCK_MODEL_ID }}\"}" \
+            --environment-variables "{\"LLM_PROVIDER\":\"bedrock\",\"BEDROCK_MODEL_ID\":\"${{ secrets.BEDROCK_MODEL_ID }}\",\"LAMBDA_FUNCTION_NAME\":\"cdci-prd-nutrient-calc\"}" \
             --region $AWS_REGION
 
       - name: Wait for READY
