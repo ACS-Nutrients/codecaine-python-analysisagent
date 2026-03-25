@@ -16,6 +16,7 @@ import logging
 import boto3
 
 from app.core.config import settings
+from app.services.kb_retriever import retrieve_drug_interactions
 from app.schemas.analysis import (
     AnalysisRequest,
     AnalysisResponse,
@@ -103,9 +104,14 @@ class AnalysisAgent:
     async def run(self, req: AnalysisRequest) -> AnalysisResponse:
         # ── Step 1: LLM 분석 ─────────────────────────────────────
         logger.info(f"[{req.cognito_id}] Step 1 시작")
+        kb_context = retrieve_drug_interactions(req.medication_info or [], [])
+        step1_user_prompt = self._build_step1_prompt(req)
+        if kb_context:
+            step1_user_prompt += f"\n\n[의약품-영양소 상호작용 참고 정보]\n{kb_context}"
+            logger.info(f"[{req.cognito_id}] KB 컨텍스트 주입됨")
         step1_raw = self._call_llm(
             system=SYSTEM_PROMPT_STEP1,
-            user=self._build_step1_prompt(req),
+            user=step1_user_prompt,
         )
         step1_data         = self._parse_json(step1_raw)
         required_nutrients = step1_data.get("required_nutrients", [])
