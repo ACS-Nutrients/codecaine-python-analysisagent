@@ -214,10 +214,10 @@ class AnalysisAgent:
         }
         # analysis_agent.py _call_lambda() 수정
         response = self.lambda_client.invoke(
-        FunctionName=settings.LAMBDA_FUNCTION_NAME,
-        InvocationType="RequestResponse",
-        Payload=json.dumps(payload, ensure_ascii=False).encode("utf-8"),  # 수정
-)
+            FunctionName=settings.LAMBDA_FUNCTION_NAME,
+            InvocationType="RequestResponse",
+            Payload=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        )
         result = json.loads(response["Payload"].read())
         return result.get("gaps", [])
 

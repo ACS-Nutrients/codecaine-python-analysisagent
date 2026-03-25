@@ -4,7 +4,7 @@ import boto3, json
 client = boto3.client("bedrock-agentcore", region_name="ap-northeast-2")
 
 response = client.invoke_agent_runtime(
-    agentRuntimeArn="arn:aws:bedrock-agentcore:ap-northeast-2:070238434919:runtime/analysis_agent-bA2YOVDhUj",
+    agentRuntimeArn="arn:aws:bedrock-agentcore:ap-northeast-2:620758375333:runtime/cdci_prd_analysis_agent-wCS0IP7dHa",
     payload=json.dumps({
         "cognito_id": "test-user",
         "intake_purpose": "피로 회복",
