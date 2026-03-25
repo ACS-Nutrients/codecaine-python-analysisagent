@@ -89,6 +89,7 @@ jobs:
             --agent-runtime-id ${{ secrets.AGENTCORE_RUNTIME_ID }} \
             --agent-runtime-artifact "{\"containerConfiguration\": {\"containerUri\": \"$IMAGE_URI\"}}" \
             --role-arn ${{ secrets.AGENTCORE_ROLE_ARN }} \
+            --environment-variables '{"LLM_PROVIDER":"bedrock"}' \
             --region $AWS_REGION
 
       - name: Wait for READY
