@@ -8,6 +8,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import invocations
 
+from app.metrics import init_metrics
+init_metrics()
+
 app = FastAPI(title="Analysis Agent", version="1.0.0")
 
 app.add_middleware(
