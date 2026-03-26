@@ -293,6 +293,11 @@ class AnalysisAgent:
             text = text.split("```")[1]
             if text.startswith("json"):
                 text = text[4:].strip()
+        # JSON 블록 앞뒤 텍스트 제거
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        if start != -1 and end > start:
+            text = text[start:end]
         try:
             return json.loads(text)
         except json.JSONDecodeError as e:
