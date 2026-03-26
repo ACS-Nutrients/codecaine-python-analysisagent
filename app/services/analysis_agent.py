@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 AGENT_NAME = "analysis-agent"
 
 
-def measure_step(tool_name: str, tool_fn, *args, **kwargs):
+def execute_step(tool_name: str, tool_fn, *args, **kwargs):
     start = time.time()
     status = "success"
     try:
@@ -126,12 +126,12 @@ class AnalysisAgent:
     async def run(self, req: AnalysisRequest) -> AnalysisResponse:
         # ── Step 1: LLM 분석 ─────────────────────────────────────
         logger.info(f"[{req.cognito_id}] Step 1 시작")
-        kb_context = measure_step("kb_retrieval", retrieve_drug_interactions, req.medication_info or [], [])
+        kb_context = execute_step("kb_retrieval", retrieve_drug_interactions, req.medication_info or [], [])
         step1_user_prompt = self._build_step1_prompt(req)
         if kb_context:
             step1_user_prompt += f"\n\n[의약품-영양소 상호작용 참고 정보]\n{kb_context}"
             logger.info(f"[{req.cognito_id}] KB 컨텍스트 주입됨")
-        step1_raw = measure_step("step1_llm", self._call_llm,
+        step1_raw = execute_step("step1_llm", self._call_llm,
             system=SYSTEM_PROMPT_STEP1,
             user=step1_user_prompt,
         )
@@ -142,7 +142,7 @@ class AnalysisAgent:
 
         # ── Step 2: Lambda 갭 계산 ───────────────────────────────
         logger.info(f"[{req.cognito_id}] Step 2 시작")
-        gaps = measure_step("nutrient_calc", self._call_lambda,
+        gaps = execute_step("nutrient_calc", self._call_lambda,
             cognito_id=req.cognito_id,
             required_nutrients=required_nutrients,
             current_supplements=req.current_supplements or [],
@@ -152,7 +152,7 @@ class AnalysisAgent:
 
         # ── Step 3: LLM 추천 ─────────────────────────────────────
         logger.info(f"[{req.cognito_id}] Step 3 시작")
-        step3_raw = measure_step("step3_llm", self._call_llm,
+        step3_raw = execute_step("step3_llm", self._call_llm,
             system=SYSTEM_PROMPT_STEP3,
             user=self._build_step3_prompt(gaps, req.products or []),
         )
