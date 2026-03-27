@@ -62,6 +62,11 @@ SYSTEM_PROMPT_STEP1 = """당신은 영양 전문가 AI입니다.
 - 섭취 목적에 맞는 영양소 우선 제안
 - 한국 영양소 기준 섭취량(KDRIs) 기반 권장량
 
+재분석 시 추가 기준:
+- 섭취 목적(new_purpose)이 제공된 경우 해당 목적으로 분석
+- 섭취 목적이 없는 경우 이전 분석 결과(previous_analysis)의 summary에서 기존 목적 파악
+- 이전 분석 결과가 있는 경우 기존 추천과 달라진 이유를 reason 필드에 명시
+
 반드시 아래 JSON 형식으로만 응답하십시오. JSON 외 텍스트 없이 출력합니다.
 {
   "required_nutrients": [
@@ -253,10 +258,16 @@ class AnalysisAgent:
     # ── 프롬프트 빌더 ─────────────────────────────────────────────
 
     def _build_step1_prompt(self, req: AnalysisRequest) -> str:
+        purpose = req.new_purpose or req.intake_purpose or ""
         parts = [
             f"사용자 ID: {req.cognito_id}",
-            f"섭취 목적: {req.intake_purpose}",
+            f"섭취 목적: {purpose}",
         ]
+        if req.user_profile:
+            parts.append(
+                "사용자 프로필:\n"
+                + json.dumps(req.user_profile, ensure_ascii=False, indent=2)
+            )
         if req.codef_health_data:
             parts.append(
                 "건강검진 데이터:\n"

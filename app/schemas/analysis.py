@@ -7,7 +7,8 @@ from pydantic import BaseModel, Field
 class AnalysisRequest(BaseModel):
     """App → AgentCore Runtime 호출 시 payload"""
     cognito_id: str
-    intake_purpose: str = Field(..., description="섭취 목적")
+    intake_purpose: str | None = Field(None, description="섭취 목적 (일반 분석용)")
+    new_purpose: str | None = Field(None, description="새 섭취 목적 (챗봇 재분석용 — 없으면 previous_analysis에서 파악)")
     codef_health_data: dict | None = Field(None, description="CODEF 건강검진 JSON")
     medication_info: list[dict] | None = Field(None, description="의약품 투약 정보")
     current_supplements: list[dict] | None = Field(
@@ -21,6 +22,11 @@ class AnalysisRequest(BaseModel):
     products: list[dict] | None = Field(
         None,
         description="추천 후보 영양제 목록 (App이 products + product_nutrients 조회 후 전달)"
+    )
+
+    user_profile: dict | None = Field(
+        None,
+        description="사용자 프로필 (birth_dt, gender, height, weight, allergies, chron_diseases)"
     )
 
     # TODO: chat_history 실제 형식은 챗봇 서비스 구현 후 확정 필요
