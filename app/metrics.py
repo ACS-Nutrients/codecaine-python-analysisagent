@@ -58,3 +58,7 @@ agent_latency_histogram    = _Histogram("agent_latency_seconds")
 tool_execution_counter     = _Counter("tool_execution_total")
 tool_duration_histogram    = _Histogram("tool_execution_duration_seconds")
 tool_approval_counter      = _Counter("tool_approval_total")
+
+# KB 검색 품질 지표
+kb_chunks_retrieved_counter = _Counter("kb_chunks_retrieved_total")  # 쿼리당 검색된 청크 수
+kb_context_counter          = _Counter("kb_context_total")           # hit(컨텍스트 주입됨) / miss
