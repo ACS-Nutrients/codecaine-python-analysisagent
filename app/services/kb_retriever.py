@@ -18,6 +18,7 @@ import boto3
 import numpy as np
 
 from app.core.config import settings
+from app.metrics import kb_chunks_retrieved_counter
 
 logger = logging.getLogger(__name__)
 
@@ -81,10 +82,12 @@ def retrieve(query: str) -> str:
         docs = [texts["documents"][i] for i in top_indices]
         if not docs:
             logger.info(f"[KB] 검색 결과 없음: {query}")
+            kb_chunks_retrieved_counter.add(0, {"agent_name": "analysis-agent"})
             return ""
 
         context = "\n\n".join(docs)
         logger.info(f"[KB] {len(docs)}개 청크 검색됨 (query: {query[:50]})")
+        kb_chunks_retrieved_counter.add(len(docs), {"agent_name": "analysis-agent"})
         return context
 
     except Exception as e:

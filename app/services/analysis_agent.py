@@ -22,6 +22,7 @@ from app.metrics import (
     tool_duration_histogram,
     agent_token_input_counter,
     agent_token_output_counter,
+    kb_context_counter,
 )
 from app.services.kb_retriever import retrieve_drug_interactions
 from app.schemas.analysis import (
@@ -142,6 +143,9 @@ class AnalysisAgent:
         if kb_context:
             step1_user_prompt += f"\n\n[의약품-영양소 상호작용 참고 정보]\n{kb_context}"
             logger.info(f"[{req.cognito_id}] KB 컨텍스트 주입됨")
+            kb_context_counter.add(1, {"agent_name": AGENT_NAME, "status": "hit"})
+        else:
+            kb_context_counter.add(1, {"agent_name": AGENT_NAME, "status": "miss"})
         step1_raw = execute_step("step1_llm", self._call_llm,
             system=SYSTEM_PROMPT_STEP1,
             user=step1_user_prompt,
