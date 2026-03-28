@@ -101,6 +101,14 @@ Chatbot Super Agent가 재분석 요청 시 사용. DB 저장 없이 결과 JSON
 응답: { "step1": {...}, "step2": {...}, "step3": {...} }
 ```
 
+> `step1.summary`에는 LLM 생성 필드 외에 아래 컨텍스트 필드가 추가로 주입됨:
+> - `purpose`: 재분석 목적 (`new_purpose`, 없으면 빈 문자열)
+> - `medications`: 복용 약물 이름 목록 (CODEF에서 조회)
+> - `supplements`: 섭취 중인 영양제 이름 목록 (`analysis_supplements` DB 조회)
+
+```
+```
+
 **추가된 파일**:
 - `app/schemas/analysis.py` → `ChatCalculateRequest`
 - `app/services/analysis_service.py` → `start_chat_analysis()`

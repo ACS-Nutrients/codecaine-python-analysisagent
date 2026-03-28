@@ -67,6 +67,12 @@ SYSTEM_PROMPT_STEP1 = """당신은 영양 전문가 AI입니다.
 - 섭취 목적이 없는 경우 이전 분석 결과(previous_analysis)의 summary에서 기존 목적 파악
 - 이전 분석 결과가 있는 경우 기존 추천과 달라진 이유를 reason 필드에 명시
 
+required_nutrients 작성 규칙:
+- 반드시 구체적인 rda_amount(숫자)와 unit(문자열)이 있는 영양소만 포함할 것
+- 약물 상호작용으로 주의하거나 제한해야 하는 영양소(예: 와파린 복용 시 비타민K)는
+  required_nutrients에 포함하지 말고 summary.key_concerns에 명시할 것
+- rda_amount나 unit을 특정할 수 없는 경우 해당 영양소는 제외할 것
+
 반드시 아래 JSON 형식으로만 응답하십시오. JSON 외 텍스트 없이 출력합니다.
 {
   "required_nutrients": [
@@ -80,7 +86,7 @@ SYSTEM_PROMPT_STEP1 = """당신은 영양 전문가 AI입니다.
   ],
   "summary": {
     "overall_assessment": "전반적인 영양 상태 평가",
-    "key_concerns": ["우려사항1", "우려사항2"],
+    "key_concerns": ["우려사항1", "와파린 복용 중 비타민K 섭취 주의"],
     "lifestyle_notes": "생활습관 메모"
   }
 }"""
@@ -141,7 +147,10 @@ class AnalysisAgent:
             user=step1_user_prompt,
         )
         step1_data         = self._parse_json(step1_raw)
-        required_nutrients = step1_data.get("required_nutrients", [])
+        required_nutrients = [
+            n for n in step1_data.get("required_nutrients", [])
+            if n.get("rda_amount") is not None and n.get("unit") is not None
+        ]
         summary            = step1_data.get("summary", {})
         logger.info(f"[{req.cognito_id}] Step 1 완료 — 영양소 {len(required_nutrients)}개")
 
