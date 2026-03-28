@@ -3,4 +3,4 @@ uvicorn[standard]==0.30.1
 pydantic==2.7.4
 pydantic-settings==2.3.4
 boto3==1.34.144
-chromadb==0.5.23
+numpy==1.26.4

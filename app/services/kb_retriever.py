@@ -1,17 +1,21 @@
 """
 kb_retriever.py
 
-이미지에 포함된 Chroma DB에서 영양소-의약품 상호작용 정보를 검색.
+이미지에 포함된 KB 파일에서 영양소-의약품 상호작용 정보를 검색.
 
-Chroma DB는 빌드 시 이미지에 포함 (lpi_vector_db/ → /app/lpi_vector_db/)
-S3 다운로드 불필요, 콜드스타트 없음.
+KB 파일:
+  lpi_kb.npz        — 정규화된 임베딩 벡터 (252, 1536) float32
+  lpi_kb_texts.json — 문서 텍스트 + 메타데이터
+
+벡터 검색: numpy cosine similarity (브루트포스)
+임베딩 모델: global.cohere.embed-v4:0 (AWS Bedrock, 1536차원)
 """
 
 import json
 import logging
+
 import boto3
-import chromadb
-from chromadb import EmbeddingFunction, Embeddings
+import numpy as np
 
 from app.core.config import settings
 
@@ -20,59 +24,43 @@ logger = logging.getLogger(__name__)
 _COHERE_MODEL_ID = "global.cohere.embed-v4:0"
 
 
-class CohereBedrockEmbeddingFn(EmbeddingFunction):
-    """
-    임베딩 모델 : global.cohere.embed-v4:0 (AWS Bedrock Inference Profile)
-    임베딩 차원 : 1536
-    유사도 공간 : cosine
-    다국어      : 한국어/영어 크로스랭귀얼 지원
-
-    input_type:
-      ChromaDB 환경에서는 저장·쿼리 모두 "search_query" 고정.
-      search_document/search_query를 혼용하면 서로 다른 벡터 부공간에 임베딩이 생성되어
-      코사인 유사도가 음수(-0.87~-0.96)로 계산됨 → 검색 실패.
-    """
-    def __init__(self, input_type: str = "search_query"):
-        self._client = boto3.client("bedrock-runtime", region_name=settings.AWS_REGION)
-        self._input_type = input_type
-
-    def __call__(self, input: list[str]) -> Embeddings:
-        response = self._client.invoke_model(
-            modelId=_COHERE_MODEL_ID,
-            body=json.dumps({
-                "texts": input,
-                "input_type": self._input_type,
-                "embedding_types": ["float"],
-            }),
-            contentType="application/json",
-            accept="application/json",
-        )
-        result = json.loads(response["body"].read())
-        return result["embeddings"]["float"]
-
-
-# 컨테이너 내 캐싱 (요청마다 새로 로드하지 않도록)
-_collection = None
-
-
-def _get_collection():
-    global _collection
-    if _collection is not None:
-        return _collection
-
-    client = chromadb.PersistentClient(path=settings.KB_LOCAL_PATH)
-
-    collections = client.list_collections()
-    logger.info(f"[KB] 사용 가능한 collections: {[c.name for c in collections]}")
-
-    embedding_fn = CohereBedrockEmbeddingFn(input_type="search_query")
-    _collection = client.get_collection(
-        name=settings.KB_COLLECTION_NAME,
-        embedding_function=embedding_fn,
+def _embed_query(text: str) -> np.ndarray:
+    """Cohere Bedrock으로 쿼리 임베딩 후 정규화된 벡터 반환."""
+    client = boto3.client("bedrock-runtime", region_name=settings.AWS_REGION)
+    response = client.invoke_model(
+        modelId=_COHERE_MODEL_ID,
+        body=json.dumps({
+            "texts": [text],
+            "input_type": "search_query",
+            "embedding_types": ["float"],
+        }),
+        contentType="application/json",
+        accept="application/json",
     )
-    logger.info(f"[KB] collection 로드 완료 — {_collection.count()}개 청크")
+    result = json.loads(response["body"].read())
+    vec = np.array(result["embeddings"]["float"][0], dtype=np.float32)
+    return vec / np.linalg.norm(vec)
 
-    return _collection
+
+# 컨테이너 내 캐싱 (요청마다 파일을 다시 읽지 않도록)
+_vectors = None   # (252, 1536) float32, 미리 정규화됨
+_texts = None     # {"documents": [...], "metadatas": [...]}
+
+
+def _get_kb():
+    global _vectors, _texts
+    if _vectors is not None:
+        return _vectors, _texts
+
+    vectors_path = f"{settings.KB_LOCAL_PATH}/lpi_kb.npz"
+    texts_path = f"{settings.KB_LOCAL_PATH}/lpi_kb_texts.json"
+
+    _vectors = np.load(vectors_path)["vectors"]
+    with open(texts_path, encoding="utf-8") as f:
+        _texts = json.load(f)
+
+    logger.info(f"[KB] 로드 완료 — {_vectors.shape[0]}개 청크, {_vectors.shape[1]}차원")
+    return _vectors, _texts
 
 
 def retrieve(query: str) -> str:
@@ -83,12 +71,14 @@ def retrieve(query: str) -> str:
         관련 청크들을 합친 텍스트 (프롬프트 주입용)
     """
     try:
-        collection = _get_collection()
-        results = collection.query(
-            query_texts=[query],
-            n_results=settings.KB_TOP_K,
-        )
-        docs = results.get("documents", [[]])[0]
+        vectors, texts = _get_kb()
+        query_vec = _embed_query(query)
+
+        # cosine similarity: 이미 정규화된 벡터끼리 dot product = cosine similarity
+        similarities = vectors @ query_vec
+        top_indices = np.argsort(similarities)[::-1][:settings.KB_TOP_K]
+
+        docs = [texts["documents"][i] for i in top_indices]
         if not docs:
             logger.info(f"[KB] 검색 결과 없음: {query}")
             return ""
@@ -119,7 +109,7 @@ def retrieve_drug_interactions(
     med_names = [m.get("name", "") for m in medications if m.get("name")]
     contexts = []
 
-    # 약물별 개별 쿼리 (약물명 + "drug nutrient interaction" 패턴)
+    # 약물별 개별 쿼리
     for med in med_names:
         context = retrieve(f"{med} drug nutrient vitamin interaction")
         if context:

@@ -255,3 +255,4 @@ cp -r ./lpi_vector_db analysis-agent-ver1/lpi_vector_db
 현재 ChromaDB는 hnswlib(C++ 빌드) 의존성으로 인해 CI/CD 빌드 시간이 증가함.
 252청크 규모에서는 numpy cosine similarity로 교체해도 성능 차이 없음.
 → `docs/future-considerations.md` 참고
+
