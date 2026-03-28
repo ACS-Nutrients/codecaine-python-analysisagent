@@ -74,6 +74,15 @@ required_nutrients 작성 규칙:
   required_nutrients에 포함하지 말고 summary.key_concerns에 명시할 것
 - rda_amount나 unit을 특정할 수 없는 경우 해당 영양소는 제외할 것
 
+key_concerns 작성 규칙:
+- 약물 관련 우려사항은 반드시 아래 형식으로 구체적으로 작성할 것
+  형식: "[약물명] 복용 중 [영양소명] [주의 내용]"
+  예시: "몬테루칸정(Montelukast) 복용 중 비타민 D 흡수 저하 가능 — 보충 권장"
+        "와파린(Warfarin) 복용 중 비타민 K 과다 섭취 주의 — 항응고 효과 감소 위험"
+- "알레르기 약물과 영양소 상호작용 주의"처럼 뭉뚱그린 표현은 금지
+- 약물명이 여러 개일 경우 각각 별도 항목으로 작성할 것
+- 상호작용 정보를 모르는 경우 해당 항목 생략 (추측 금지)
+
 반드시 아래 JSON 형식으로만 응답하십시오. JSON 외 텍스트 없이 출력합니다.
 {
   "required_nutrients": [
@@ -87,7 +96,10 @@ required_nutrients 작성 규칙:
   ],
   "summary": {
     "overall_assessment": "전반적인 영양 상태 평가",
-    "key_concerns": ["우려사항1", "와파린 복용 중 비타민K 섭취 주의"],
+    "key_concerns": [
+      "혈색소 수치 경계값 — 철분 결핍 가능성 모니터링 필요",
+      "몬테루칸정(Montelukast) 복용 중 비타민 D 흡수 저하 가능 — 보충 권장"
+    ],
     "lifestyle_notes": "생활습관 메모"
   }
 }"""
