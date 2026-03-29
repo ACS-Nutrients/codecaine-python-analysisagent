@@ -27,6 +27,7 @@ from app.services.kb_retriever import retrieve_drug_interactions
 from app.schemas.analysis import (
     AnalysisRequest,
     AnalysisResponse,
+    AnalysisSummary,
     NutrientGapItem,
     RecommendationItem,
     RequiredNutrient,
@@ -62,6 +63,36 @@ SYSTEM_PROMPT_STEP1 = """당신은 영양 전문가 AI입니다.
 - 섭취 목적에 맞는 영양소 우선 제안
 - 한국 영양소 기준 섭취량(KDRIs) 기반 권장량
 
+재분석 시 추가 기준:
+- 섭취 목적(new_purpose)이 제공된 경우 해당 목적으로 분석
+- 섭취 목적이 없는 경우 이전 분석 결과(previous_analysis)의 summary에서 기존 목적 파악
+- 이전 분석 결과가 있는 경우 기존 추천과 달라진 이유를 reason 필드에 명시
+
+required_nutrients 작성 규칙:
+- 반드시 구체적인 rda_amount(숫자)와 unit(문자열)이 있는 영양소만 포함할 것
+- 약물 상호작용으로 주의하거나 제한해야 하는 영양소(예: 와파린 복용 시 비타민K)는
+  required_nutrients에 포함하지 말고 summary.key_concerns에 명시할 것
+- rda_amount나 unit을 특정할 수 없는 경우 해당 영양소는 제외할 것
+
+key_concerns 작성 규칙:
+- 약물 관련 우려사항은 반드시 아래 형식으로 구체적으로 작성할 것
+  형식: "[약물명] 복용 중 [영양소명] [주의 내용]"
+  예시: "몬테루칸정(Montelukast) 복용 중 비타민 D 흡수 저하 가능 — 보충 권장"
+        "와파린(Warfarin) 복용 중 비타민 K 과다 섭취 주의 — 항응고 효과 감소 위험"
+- "알레르기 약물과 영양소 상호작용 주의"처럼 뭉뚱그린 표현은 금지
+- 약물명이 여러 개일 경우 각각 별도 항목으로 작성할 것
+- 상호작용 정보를 모르는 경우 해당 항목 생략 (추측 금지)
+
+summary 작성 지침:
+- overall_assessment: 검진 수치를 구체적으로 언급하며 현재 영양 상태를 3문장 이상으로 서술.
+  예) "비타민D 수치가 18.0 ng/mL로 정상 범위(30~100)의 60% 수준입니다. 철분 관련 페리틴도 20 ng/mL로 경계값에 해당하며..."
+- lifestyle_notes: 항목별로 실천 가능한 조언을 구체적으로 작성
+  - diet: 식품 예시 포함 (예: "등 푸른 생선 주 2회, 달걀노른자 매일 섭취 권장")
+  - exercise: 운동 종류·빈도 포함 (예: "야외 유산소 운동 주 3회, 회당 30분 이상으로 비타민D 합성 촉진")
+  - sleep: 수면과 영양소 연관성 포함 (예: "마그네슘 섭취 시 취침 1시간 전 복용 시 수면 질 개선에 도움")
+  - supplement_timing: 영양소별 최적 복용 시간 안내 (예: "지용성 비타민(A·D·E·K)은 식후, 철분은 공복 복용")
+- risk_warnings: 의약품 상호작용이나 과잉 섭취 위험이 있는 경우 경고 문구 추가 (없으면 빈 배열)
+
 반드시 아래 JSON 형식으로만 응답하십시오. JSON 외 텍스트 없이 출력합니다.
 {
   "required_nutrients": [
@@ -74,9 +105,18 @@ SYSTEM_PROMPT_STEP1 = """당신은 영양 전문가 AI입니다.
     }
   ],
   "summary": {
-    "overall_assessment": "전반적인 영양 상태 평가",
-    "key_concerns": ["우려사항1", "우려사항2"],
-    "lifestyle_notes": "생활습관 메모"
+    "overall_assessment": "검진 수치를 포함한 3문장 이상의 전반적 영양 상태 평가",
+    "key_concerns": [
+      "혈색소 수치 경계값 — 철분 결핍 가능성 모니터링 필요",
+      "몬테루칸정(Montelukast) 복용 중 비타민 D 흡수 저하 가능 — 보충 권장"
+    ],
+    "lifestyle_notes": {
+      "diet": "식이 조언 (식품 예시 포함)",
+      "exercise": "운동 조언 (종류·빈도 포함)",
+      "sleep": "수면 조언 (영양소 연관성 포함)",
+      "supplement_timing": "영양제 복용 타이밍 안내"
+    },
+    "risk_warnings": ["⚠️ 와파린 복용 중 비타민K 함유 영양제 주의"]
   }
 }"""
 
@@ -164,7 +204,7 @@ class AnalysisAgent:
             cognito_id=req.cognito_id,
             step1=Step1Result(
                 required_nutrients=[RequiredNutrient(**n) for n in required_nutrients],
-                summary=summary,
+                summary=AnalysisSummary(**summary) if isinstance(summary, dict) else summary,
             ),
             step2=Step2Result(
                 gaps=[NutrientGapItem(**g) for g in gaps],
