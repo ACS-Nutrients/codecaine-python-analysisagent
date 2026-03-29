@@ -4,12 +4,19 @@ AgentCore Runtime 컨트랙트:
   - POST /invocations  → Agent 실행 진입점
 """
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import invocations
 
 from app.metrics import init_metrics
 init_metrics()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
 
 app = FastAPI(title="Analysis Agent", version="1.0.0")
 

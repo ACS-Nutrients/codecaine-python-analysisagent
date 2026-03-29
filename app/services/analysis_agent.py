@@ -22,6 +22,7 @@ from app.metrics import (
     tool_duration_histogram,
     agent_token_input_counter,
     agent_token_output_counter,
+    kb_context_counter,
 )
 from app.services.kb_retriever import retrieve_drug_interactions
 from app.schemas.analysis import (
@@ -41,7 +42,7 @@ logger = logging.getLogger(__name__)
 AGENT_NAME = "analysis-agent"
 
 
-def execute_tool(tool_name: str, tool_fn, *args, **kwargs):
+def execute_step(tool_name: str, tool_fn, *args, **kwargs):
     start = time.time()
     status = "success"
     try:
@@ -166,23 +167,29 @@ class AnalysisAgent:
     async def run(self, req: AnalysisRequest) -> AnalysisResponse:
         # ── Step 1: LLM 분석 ─────────────────────────────────────
         logger.info(f"[{req.cognito_id}] Step 1 시작")
-        kb_context = execute_tool("kb_retrieval", retrieve_drug_interactions, req.medication_info or [], [])
+        kb_context = execute_step("kb_retrieval", retrieve_drug_interactions, req.medication_info or [], [])
         step1_user_prompt = self._build_step1_prompt(req)
         if kb_context:
             step1_user_prompt += f"\n\n[의약품-영양소 상호작용 참고 정보]\n{kb_context}"
             logger.info(f"[{req.cognito_id}] KB 컨텍스트 주입됨")
-        step1_raw = execute_tool("step1_llm", self._call_llm,
+            kb_context_counter.add(1, {"agent_name": AGENT_NAME, "status": "hit"})
+        else:
+            kb_context_counter.add(1, {"agent_name": AGENT_NAME, "status": "miss"})
+        step1_raw = execute_step("step1_llm", self._call_llm,
             system=SYSTEM_PROMPT_STEP1,
             user=step1_user_prompt,
         )
         step1_data         = self._parse_json(step1_raw)
-        required_nutrients = step1_data.get("required_nutrients", [])
+        required_nutrients = [
+            n for n in step1_data.get("required_nutrients", [])
+            if n.get("rda_amount") is not None and n.get("unit") is not None
+        ]
         summary            = step1_data.get("summary", {})
         logger.info(f"[{req.cognito_id}] Step 1 완료 — 영양소 {len(required_nutrients)}개")
 
         # ── Step 2: Lambda 갭 계산 ───────────────────────────────
         logger.info(f"[{req.cognito_id}] Step 2 시작")
-        gaps = execute_tool("nutrient_calc", self._call_lambda,
+        gaps = execute_step("nutrient_calc", self._call_lambda,
             cognito_id=req.cognito_id,
             required_nutrients=required_nutrients,
             current_supplements=req.current_supplements or [],
@@ -192,7 +199,7 @@ class AnalysisAgent:
 
         # ── Step 3: LLM 추천 ─────────────────────────────────────
         logger.info(f"[{req.cognito_id}] Step 3 시작")
-        step3_raw = execute_tool("step3_llm", self._call_llm,
+        step3_raw = execute_step("step3_llm", self._call_llm,
             system=SYSTEM_PROMPT_STEP3,
             user=self._build_step3_prompt(gaps, req.products or []),
         )
@@ -293,10 +300,16 @@ class AnalysisAgent:
     # ── 프롬프트 빌더 ─────────────────────────────────────────────
 
     def _build_step1_prompt(self, req: AnalysisRequest) -> str:
+        purpose = req.new_purpose or req.intake_purpose or ""
         parts = [
             f"사용자 ID: {req.cognito_id}",
-            f"섭취 목적: {req.intake_purpose}",
+            f"섭취 목적: {purpose}",
         ]
+        if req.user_profile:
+            parts.append(
+                "사용자 프로필:\n"
+                + json.dumps(req.user_profile, ensure_ascii=False, indent=2)
+            )
         if req.codef_health_data:
             parts.append(
                 "건강검진 데이터:\n"

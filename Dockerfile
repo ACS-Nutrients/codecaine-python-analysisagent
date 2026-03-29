@@ -1,7 +1,7 @@
 # 빌드 스테이지
 FROM --platform=linux/arm64 python:3.12-slim AS builder
 
-RUN apt-get update && apt-get install -y gcc g++ && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY requirements.txt .
@@ -13,7 +13,8 @@ FROM python:3.12-slim
 WORKDIR /app
 COPY --from=builder /root/.local /root/.local
 COPY app/ ./app/
-COPY lpi_vector_db/ ./lpi_vector_db/
+COPY lpi_kb.npz ./lpi_kb.npz
+COPY lpi_kb_texts.json ./lpi_kb_texts.json
 
 ENV PATH=/root/.local/bin:$PATH
 

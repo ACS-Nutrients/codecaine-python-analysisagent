@@ -26,9 +26,8 @@ class Settings(BaseSettings):
     # Lambda 함수명
     LAMBDA_FUNCTION_NAME: str = "action-nutrient-calc"
 
-    # Knowledge Base (이미지에 포함된 Chroma DB)
-    KB_LOCAL_PATH: str = "/app/lpi_vector_db"
-    KB_COLLECTION_NAME: str = "lpi_interactions"
+    # Knowledge Base (이미지에 포함된 numpy KB)
+    KB_LOCAL_PATH: str = "/app"
     KB_TOP_K: int = 3
 
     class Config:
