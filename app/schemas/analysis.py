@@ -76,9 +76,23 @@ class RecommendationItem(BaseModel):
     covered_nutrients: list[str] = []
 
 
+class LifestyleNotes(BaseModel):
+    diet: str = ""
+    exercise: str = ""
+    sleep: str = ""
+    supplement_timing: str = ""
+
+
+class AnalysisSummary(BaseModel):
+    overall_assessment: str = ""
+    key_concerns: list[str] = []
+    lifestyle_notes: LifestyleNotes = Field(default_factory=LifestyleNotes)
+    risk_warnings: list[str] = []
+
+
 class Step1Result(BaseModel):
     required_nutrients: list[RequiredNutrient]
-    summary: dict
+    summary: AnalysisSummary
 
 
 class Step2Result(BaseModel):
