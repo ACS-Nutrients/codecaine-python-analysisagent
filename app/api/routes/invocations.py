@@ -9,7 +9,7 @@ router = APIRouter()
 AGENT_NAME = "analysis-agent"
 
 
-@router.post("/invocations", response_model=AnalysisResponse)
+@router.post("/invocations")
 async def invocations(req: AnalysisRequest):
     """
     AgentCore Runtime 필수 엔드포인트.
@@ -19,7 +19,8 @@ async def invocations(req: AnalysisRequest):
     status = "success"
     try:
         agent = AnalysisAgent()
-        return await agent.run(req)
+        result = await agent.run(req)
+        return result.model_dump()
     except ValueError as e:
         status = "error"
         raise HTTPException(status_code=422, detail=str(e))
