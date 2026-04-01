@@ -8,6 +8,8 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from aws_xray_sdk.core import xray_recorder, patch_all
+from aws_xray_sdk.ext.fastapi.middleware import XRayMiddleware
 from app.api.routes import invocations
 
 from app.metrics import init_metrics
@@ -18,8 +20,12 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 
+xray_recorder.configure(service="cdci-prd-analysis-agent")
+patch_all()
+
 app = FastAPI(title="Analysis Agent", version="1.0.0")
 
+app.add_middleware(XRayMiddleware, recorder=xray_recorder)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
