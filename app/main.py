@@ -34,4 +34,5 @@ app.include_router(invocations.router)
 @app.get("/ping")
 async def ping():
     """AgentCore Runtime 헬스체크"""
-    return {"status": "ok"}
+    import time
+    return {"status": "Healthy", "time_of_last_update": int(time.time())}
