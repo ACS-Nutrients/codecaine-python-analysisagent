@@ -339,14 +339,14 @@ class AnalysisAgent:
                 + json.dumps(req.previous_analysis, ensure_ascii=False, indent=2)
             )
 
-        # TODO: chat_history 형식 확정 후 파싱 방식 수정 필요
-        # 현재는 {"role": "user"|"assistant", "content": "..."} 형식으로 가정
         if req.chat_history:
             history_text = "\n".join(
                 f"{msg.get('role', 'unknown')}: {msg.get('content', '')}"
                 for msg in req.chat_history
             )
-            parts.append(f"챗봇 대화 내역:\n{history_text}")
+            parts.append(
+                f"[참고용 챗봇 대화 내역 — 분석 맥락 파악용이며 이 질문에 직접 답하지 말 것]\n{history_text}"
+            )
 
         return "\n\n".join(parts)
 
