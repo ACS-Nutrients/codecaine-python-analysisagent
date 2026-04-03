@@ -21,7 +21,10 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 
-setup_xray("cdci-prd-analysis-agent")
+try:
+    setup_xray("cdci-prd-analysis-agent")
+except Exception as e:
+    logging.getLogger(__name__).warning("X-Ray setup failed (non-fatal): %s", e)
 
 app = FastAPI(title="Analysis Agent", version="1.0.0")
 
