@@ -34,7 +34,7 @@ async def invocations(request: Request):
     try:
         agent = AnalysisAgent()
         result = await agent.run(req)
-        return JSONResponse(content=result.model_dump())
+        return JSONResponse(content=result.model_dump(mode="json"))
     except ValueError as e:
         status = "error"
         logger.error(f"[INVOCATIONS] Validation error: {e}")
