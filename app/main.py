@@ -8,12 +8,10 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.ext.fastapi.middleware import XRayMiddleware
 from app.api.routes import invocations
 
 from app.metrics import init_metrics
-from app.telemetry import setup_xray
+from app.telemetry import setup_xray, XRayMiddleware
 init_metrics()
 
 logging.basicConfig(
@@ -28,7 +26,7 @@ except Exception as e:
 
 app = FastAPI(title="Analysis Agent", version="1.0.0")
 
-app.add_middleware(XRayMiddleware, recorder=xray_recorder)
+app.add_middleware(XRayMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
