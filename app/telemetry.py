@@ -26,14 +26,17 @@ class _BotoXRayEmitter(UDPEmitter):
     def send_entity(self, entity) -> None:
         try:
             doc = entity.serialize()
-            if len(doc) > _XRAY_LIMIT:
+            doc_size = len(doc)
+            if doc_size > _XRAY_LIMIT:
                 # subsegment 제거 후 재시도 (루트 segment는 항상 전송)
                 data = json.loads(doc)
                 data.pop("subsegments", None)
                 doc = json.dumps(data)
+                logger.info("X-Ray segment stripped (was %d bytes): trace_id=%s", doc_size, entity.trace_id)
             self._get_client().put_trace_segments(
                 TraceSegmentDocuments=[doc]
             )
+            logger.info("X-Ray segment sent: trace_id=%s id=%s", entity.trace_id, entity.id)
         except Exception as exc:
             logger.warning("X-Ray put_trace_segments failed: %s", exc)
 
