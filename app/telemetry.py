@@ -74,7 +74,8 @@ class XRayMiddleware(BaseHTTPMiddleware):
             segment.add_exception(e, fatal=True)
             raise
         finally:
-            xray_recorder.end_segment()
+            segment.close()
+            xray_recorder._emitter.send_entity(segment)
 
 
 def setup_xray(service_name: str, region: str = "ap-northeast-2") -> None:
