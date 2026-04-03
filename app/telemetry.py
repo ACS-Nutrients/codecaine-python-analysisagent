@@ -1,3 +1,4 @@
+import json
 import logging
 import boto3
 from aws_xray_sdk.core import xray_recorder, patch_all
@@ -53,6 +54,13 @@ class XRayMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         trace_header = request.headers.get("X-Amzn-Trace-Id", "")
+        if not trace_header and request.method == "POST":
+            try:
+                body_bytes = await request.body()
+                body_data = json.loads(body_bytes)
+                trace_header = body_data.get("_xray_trace", "")
+            except Exception:
+                pass
         parsed = _parse_trace_header(trace_header) if trace_header else {}
 
         segment_name = xray_recorder._service or request.url.path
