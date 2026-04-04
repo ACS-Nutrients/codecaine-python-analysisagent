@@ -15,6 +15,8 @@ COPY --from=builder /root/.local /root/.local
 COPY app/ ./app/
 COPY lpi_kb.npz ./lpi_kb.npz
 COPY lpi_kb_texts.json ./lpi_kb_texts.json
+COPY lpi_kb_ko.npz ./lpi_kb_ko.npz
+COPY lpi_kb_texts_ko.json ./lpi_kb_texts_ko.json
 
 ENV PATH=/root/.local/bin:$PATH
 

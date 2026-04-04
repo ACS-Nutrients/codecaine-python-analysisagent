@@ -1,0 +1,177 @@
+{
+  "avg_faithfulness": 0.233,
+  "details": [
+    {
+      "case_id": "G-001",
+      "faithfulness": 0.4,
+      "num_claims": 5,
+      "detail": [
+        {
+          "claim": "비타민 D 수치 저하 — 피로감 유발 가능성 있음",
+          "supported": false
+        },
+        {
+          "claim": "중성지방 수치 상승 — 심혈관 건강에 주의 필요",
+          "supported": false
+        },
+        {
+          "claim": "아토르바스타틴(Atorvastatin) 복용 중 코엔자임 Q10 합성 저하 가능 — 보충 권장",
+          "supported": true
+        },
+        {
+          "claim": "비타민 D: [혈액검사 근거]: 검진 결과 비타민 D 수치가 16.5 ng/mL로 정상 범위(30~100 ng/mL) 미만",
+          "supported": false
+        },
+        {
+          "claim": "코엔자임 Q10: [약물 상호작용]: 아토르바스타틴(스타틴계 약물) 복용으로 인한 CoQ10 합성 저하 가능성",
+          "supported": true
+        }
+      ],
+      "retrieved_context_preview": [
+        "Warfarin\n\nConcomitant use of warfarin (Coumadin) and coenzyme Q 10 supplements has been reported to decrease the anticoagulant effect of warfarin in a few cases (111) . An individual on warfarin should not begin taking coenzyme Q 10 supplements without consulting the health care provider who is managing his or her anticoagulant therapy. If warfarin and coenzyme Q 10 are to be used concomitantly, blood tests to assess clotting time (prothrombin time; PT/INR) should be monitored frequently, especially in the first two weeks.\n\nHMG-CoA reductase inhibitors (statins)",
+        "The drug amiodarone, used in the management of certain cardiac arrhythmias (irregular heartbeat), including atrial fibrillation , can enhance the anticoagulant effect of warfarin and thus increase the risk of hemorrhage (135, 136) . Further, the use of cholesterol -lowering medications (like cholestyramine and colestipol), as well as orlistat, mineral oil, and the fat substitute, olestra, may interfere with fat absorption and affect the absorption of fat-soluble vitamins, including vitamin K (137) .",
+        "HMG-CoA reductase is an enzyme that catalyzes a biochemical reaction that is common to both cholesterol and coenzyme Q 10 biosynthetic pathways (see Biosynthesis ). Statins are HMG-CoA reductase inhibitors that are widely used as cholesterol-lowering medications. Statins can thus also reduce the endogenous synthesis of coenzyme Q 10 . Therapeutic use of statins, including simvastatin (Zocor), pravastatin (Pravachol), lovastatin (Mevacor, Altocor, Altoprev), rosuvastatin (Crestor), and atorvastatin (Lipitor), has been shown to decrease circulating coenzyme Q 10 concentrations (112-121) . However, because coenzyme Q 10 circulates with lipoproteins , plasma coenzyme Q 10 concentration is influenced by the concentration of circulating lipids (122, 123)"
+      ]
+    },
+    {
+      "case_id": "G-002",
+      "faithfulness": 0.0,
+      "num_claims": 3,
+      "detail": [
+        {
+          "claim": "비타민 D 수치 부족 — 보충 필요",
+          "supported": false
+        },
+        {
+          "claim": "체중 관리 — 혈압과 수면의 질 개선을 위해 중요",
+          "supported": false
+        },
+        {
+          "claim": "비타민 D: [혈액검사 근거]: 혈중 비타민 D 수치가 19.0 ng/mL로 정상 범위(30~100 ng/mL) 미만",
+          "supported": false
+        }
+      ],
+      "retrieved_context_preview": [
+        "Vitamin D\n\nVitamin D is required for optimal calcium absorption (see Function or the article on Vitamin D ). Several other nutrients (and non-nutrients) influence the retention of calcium by the body and may affect calcium nutritional status.\n\nSodium",
+        ". The Endocrine Society also recommends monitoring vitamin D status of patients on glucocorticoids and HIV treatment drugs because these medications increase the catabolism of 25-hydroxyvitamin D (40) . The use of some cytostatic agents (cell growth inhibitors) may also increase the degradation of 25-hydroxyvitamin D and 1α,25-dihydroxyvitamin D in cancer patients under chemotherapy (6) . The induction of hypercalcemia by toxic levels of vitamin D may precipitate cardiac arrhythmia in patients on digoxin (Lanoxin) (367) . Hypercalcemia may also reduce the effectiveness of verapamil (Calan) and diltiazem (Cardizem) in atrial fibrillation (367) .",
+        "The drug amiodarone, used in the management of certain cardiac arrhythmias (irregular heartbeat), including atrial fibrillation , can enhance the anticoagulant effect of warfarin and thus increase the risk of hemorrhage (135, 136) . Further, the use of cholesterol -lowering medications (like cholestyramine and colestipol), as well as orlistat, mineral oil, and the fat substitute, olestra, may interfere with fat absorption and affect the absorption of fat-soluble vitamins, including vitamin K (137) ."
+      ]
+    },
+    {
+      "case_id": "G-003",
+      "faithfulness": 0.0,
+      "num_claims": 4,
+      "detail": [
+        {
+          "claim": "중성지방 수치 경계값 — 심혈관 건강 관리 필요",
+          "supported": false
+        },
+        {
+          "claim": "아토르바스타틴(Atorvastatin) 복용 중 코엔자임 Q10 감소 가능 — 보충 권장",
+          "supported": false
+        },
+        {
+          "claim": "코엔자임 Q10: [약물 상호작용] 아토르바스타틴 복용으로 인한 CoQ10 감소 보충",
+          "supported": false
+        },
+        {
+          "claim": "오메가-3: [혈액검사 근거] 중성지방 수치 185mg/dL로 경계값 초과, 심혈관 건강 개선 필요",
+          "supported": false
+        }
+      ],
+      "retrieved_context_preview": [
+        "Warfarin\n\nConcomitant use of warfarin (Coumadin) and coenzyme Q 10 supplements has been reported to decrease the anticoagulant effect of warfarin in a few cases (111) . An individual on warfarin should not begin taking coenzyme Q 10 supplements without consulting the health care provider who is managing his or her anticoagulant therapy. If warfarin and coenzyme Q 10 are to be used concomitantly, blood tests to assess clotting time (prothrombin time; PT/INR) should be monitored frequently, especially in the first two weeks.\n\nHMG-CoA reductase inhibitors (statins)",
+        "HMG-CoA reductase is an enzyme that catalyzes a biochemical reaction that is common to both cholesterol and coenzyme Q 10 biosynthetic pathways (see Biosynthesis ). Statins are HMG-CoA reductase inhibitors that are widely used as cholesterol-lowering medications. Statins can thus also reduce the endogenous synthesis of coenzyme Q 10 . Therapeutic use of statins, including simvastatin (Zocor), pravastatin (Pravachol), lovastatin (Mevacor, Altocor, Altoprev), rosuvastatin (Crestor), and atorvastatin (Lipitor), has been shown to decrease circulating coenzyme Q 10 concentrations (112-121) . However, because coenzyme Q 10 circulates with lipoproteins , plasma coenzyme Q 10 concentration is influenced by the concentration of circulating lipids (122, 123)",
+        ". It is likely that circulating coenzyme Q 10 concentrations are decreased because statins reduce circulating lipids rather than because they inhibit coenzyme Q 10 synthesis (124) . In addition, very few studies have examined coenzyme Q 10 concentrations in tissues other than blood such that the extent to which statin therapy affects coenzyme Q 10 concentrations in the body's tissues is unknown (118 , 120 , 125) . Finally, there is currently little evidence to suggest that secondary coenzyme Q 10 deficiency is responsible for statin-associated muscle symptoms in treated patients. In addition, supplementation with coenzyme Q 10 failed to relieve myalgia in statin-treated patients (see Disease Treatment ) (126, 127) ."
+      ]
+    },
+    {
+      "case_id": "G-004",
+      "faithfulness": 0.0,
+      "num_claims": 7,
+      "detail": [
+        {
+          "claim": "비타민 D 심각한 결핍 — 뼈 건강, 면역력 저하 위험",
+          "supported": false
+        },
+        {
+          "claim": "비타민 B12 경계값 — 신경 건강, 적혈구 생성 모니터링 필요",
+          "supported": false
+        },
+        {
+          "claim": "아토르바스타틴(Atorvastatin) 복용 중 CoQ10 생성 억제 — 보충 권장",
+          "supported": false
+        },
+        {
+          "claim": "과체중 — BMI 28.4, 체중 관리 필요",
+          "supported": false
+        },
+        {
+          "claim": "비타민 D: [혈액검사 근거]: 혈중 25-OH 비타민D 수치가 10.0 ng/mL로 정상 범위(30~100 ng/mL)보다 매우 낮음",
+          "supported": false
+        },
+        {
+          "claim": "비타민 B12: [혈액검사 근거]: 혈중 비타민 B12 수치가 260.0 pg/mL로 정상 범위(300~900 pg/mL)보다 낮음",
+          "supported": false
+        },
+        {
+          "claim": "코엔자임 Q10: [약물 상호작용]: 아토르바스타틴(스타틴계 약물) 복용으로 인한 CoQ10 생성 억제 보완",
+          "supported": false
+        }
+      ],
+      "retrieved_context_preview": [
+        ". The Endocrine Society also recommends monitoring vitamin D status of patients on glucocorticoids and HIV treatment drugs because these medications increase the catabolism of 25-hydroxyvitamin D (40) . The use of some cytostatic agents (cell growth inhibitors) may also increase the degradation of 25-hydroxyvitamin D and 1α,25-dihydroxyvitamin D in cancer patients under chemotherapy (6) . The induction of hypercalcemia by toxic levels of vitamin D may precipitate cardiac arrhythmia in patients on digoxin (Lanoxin) (367) . Hypercalcemia may also reduce the effectiveness of verapamil (Calan) and diltiazem (Cardizem) in atrial fibrillation (367) .",
+        "The drug amiodarone, used in the management of certain cardiac arrhythmias (irregular heartbeat), including atrial fibrillation , can enhance the anticoagulant effect of warfarin and thus increase the risk of hemorrhage (135, 136) . Further, the use of cholesterol -lowering medications (like cholestyramine and colestipol), as well as orlistat, mineral oil, and the fat substitute, olestra, may interfere with fat absorption and affect the absorption of fat-soluble vitamins, including vitamin K (137) .",
+        "Warfarin\n\nConcomitant use of warfarin (Coumadin) and coenzyme Q 10 supplements has been reported to decrease the anticoagulant effect of warfarin in a few cases (111) . An individual on warfarin should not begin taking coenzyme Q 10 supplements without consulting the health care provider who is managing his or her anticoagulant therapy. If warfarin and coenzyme Q 10 are to be used concomitantly, blood tests to assess clotting time (prothrombin time; PT/INR) should be monitored frequently, especially in the first two weeks.\n\nHMG-CoA reductase inhibitors (statins)"
+      ]
+    },
+    {
+      "case_id": "G-005",
+      "faithfulness": 0.5,
+      "num_claims": 4,
+      "detail": [
+        {
+          "claim": "비타민 D 결핍 — 면역력 저하 및 피로감 유발 가능",
+          "supported": false
+        },
+        {
+          "claim": "메트포르민(Metformin) 복용 중 비타민 B12 흡수 저하 가능 — 주기적 모니터링 필요",
+          "supported": true
+        },
+        {
+          "claim": "비타민 D: [혈액검사 근거]: 혈중 25-OH 비타민D 수치가 18.0 ng/mL로, 정상 범위(30~100 ng/mL)보다 낮음",
+          "supported": false
+        },
+        {
+          "claim": "비타민 B12: [약물 상호작용]: 메트포르민 복용으로 인한 비타민 B12 흡수 저하 가능성",
+          "supported": true
+        }
+      ],
+      "retrieved_context_preview": [
+        ". Nevertheless, use of metformin may decrease vitamin B 12 status : a meta-analysis of four short-term intervention trials (up to 4 months’ duration) in patients with type 2 diabetes found that metformin use decreased serum cobalamin concentrations by 57 pmol/L, which could have clinical implications if such patients have suboptimal vitamin B 12 status (146) . Previous reports that megadoses of vitamin C destroy vitamin B 12 have not been supported (147) and may have been an artifact of the assay used to measure vitamin B 12 status (21) .",
+        "Other drugs found to inhibit vitamin B 12 absorption from food include cholestyramine (a bile acid -binding resin used in the treatment of high cholesterol ), chloramphenicol and neomycin (antibiotics), and colchicine (medicine for gout treatment). Metformin, a medication for individuals with type 2 diabetes mellitus , was found to decrease vitamin B 12 absorption possibly by tying up free calcium required for absorption of the IF-B 12 complex (143) . However, the clinical significance of this is unclear (144) . It is not known whether calcium supplementation can reverse vitamin B 12 malabsorption; therefore, calcium supplementation is not currently prescribed for the prevention or treatment of metformin-induced vitamin B 12 deficiency (145)",
+        ". Cimetidine, a H 2 blocker that suppresses stomach acid secretion, inhibits the hydroxylation of vitamin D in the liver (367) . Treating acid reflux, gastroesophageal reflux disease (GERD), or ulcers with proton-pump inhibitors (omeprazole, lansoprazole) might interfere with calcium absorption and increase the risk of fracture such that patients are advised to take calcium and vitamin D supplements (368) . The oral antifungal medication, ketoconazole, inhibits the 25-hydroxyvitamin D 3 -1α-hydroxylase enzyme and has been found to reduce serum 1α,25-dihydroxyvitamin D concentrations in healthy men (369)"
+      ]
+    },
+    {
+      "case_id": "G-006",
+      "faithfulness": 0.5,
+      "num_claims": 2,
+      "detail": [
+        {
+          "claim": "아토르바스타틴(Atorvastatin) 복용 중 코엔자임 Q10 합성 저하 가능 — 보충 권장",
+          "supported": false
+        },
+        {
+          "claim": "코엔자임 Q10: [약물 상호작용] 아토르바스타틴 복용으로 인한 CoQ10 합성 저하 가능성",
+          "supported": true
+        }
+      ],
+      "retrieved_context_preview": [
+        "Warfarin\n\nConcomitant use of warfarin (Coumadin) and coenzyme Q 10 supplements has been reported to decrease the anticoagulant effect of warfarin in a few cases (111) . An individual on warfarin should not begin taking coenzyme Q 10 supplements without consulting the health care provider who is managing his or her anticoagulant therapy. If warfarin and coenzyme Q 10 are to be used concomitantly, blood tests to assess clotting time (prothrombin time; PT/INR) should be monitored frequently, especially in the first two weeks.\n\nHMG-CoA reductase inhibitors (statins)",
+        "HMG-CoA reductase is an enzyme that catalyzes a biochemical reaction that is common to both cholesterol and coenzyme Q 10 biosynthetic pathways (see Biosynthesis ). Statins are HMG-CoA reductase inhibitors that are widely used as cholesterol-lowering medications. Statins can thus also reduce the endogenous synthesis of coenzyme Q 10 . Therapeutic use of statins, including simvastatin (Zocor), pravastatin (Pravachol), lovastatin (Mevacor, Altocor, Altoprev), rosuvastatin (Crestor), and atorvastatin (Lipitor), has been shown to decrease circulating coenzyme Q 10 concentrations (112-121) . However, because coenzyme Q 10 circulates with lipoproteins , plasma coenzyme Q 10 concentration is influenced by the concentration of circulating lipids (122, 123)",
+        ". It is likely that circulating coenzyme Q 10 concentrations are decreased because statins reduce circulating lipids rather than because they inhibit coenzyme Q 10 synthesis (124) . In addition, very few studies have examined coenzyme Q 10 concentrations in tissues other than blood such that the extent to which statin therapy affects coenzyme Q 10 concentrations in the body's tissues is unknown (118 , 120 , 125) . Finally, there is currently little evidence to suggest that secondary coenzyme Q 10 deficiency is responsible for statin-associated muscle symptoms in treated patients. In addition, supplementation with coenzyme Q 10 failed to relieve myalgia in statin-treated patients (see Disease Treatment ) (126, 127) ."
+      ]
+    }
+  ]
+}

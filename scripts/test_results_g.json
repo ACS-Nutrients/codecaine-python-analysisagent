@@ -196,6 +196,38 @@
           }
         ]
       }
+    },
+    "input": {
+      "cognito_id": "test-G-001",
+      "intake_purpose": "심혈관 건강, 피로 개선",
+      "codef_health_data": {
+        "25-OH 비타민D": 16.5,
+        "중성지방": 210.0
+      },
+      "medication_info": [
+        {
+          "name": "아토르바스타틴",
+          "dose": "10mg",
+          "usage": "고지혈증 치료"
+        },
+        {
+          "name": "암로디핀",
+          "dose": "5mg",
+          "usage": "고혈압 치료"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "고혈압",
+          "고지혈증"
+        ]
+      }
     }
   },
   {
@@ -321,6 +353,31 @@
               "판토텐산"
             ]
           }
+        ]
+      }
+    },
+    "input": {
+      "cognito_id": "test-G-002",
+      "intake_purpose": "수면 개선, 혈압 관리",
+      "codef_health_data": {
+        "25-OH 비타민D": 19.0
+      },
+      "medication_info": [
+        {
+          "name": "암로디핀",
+          "dose": "5mg",
+          "usage": "고혈압 치료"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "고혈압"
         ]
       }
     }
@@ -462,6 +519,32 @@
               "마그네슘"
             ]
           }
+        ]
+      }
+    },
+    "input": {
+      "cognito_id": "test-G-003",
+      "intake_purpose": "피로 개선, 심혈관 건강",
+      "codef_health_data": {
+        "25-OH 비타민D": 32.0,
+        "중성지방": 185.0
+      },
+      "medication_info": [
+        {
+          "name": "아토르바스타틴",
+          "dose": "20mg",
+          "usage": "고지혈증 치료"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "고지혈증"
         ]
       }
     }
@@ -677,6 +760,38 @@
           }
         ]
       }
+    },
+    "input": {
+      "cognito_id": "test-G-004",
+      "intake_purpose": "전반적 건강 개선",
+      "codef_health_data": {
+        "25-OH 비타민D": 10.0,
+        "비타민B12": 260.0
+      },
+      "medication_info": [
+        {
+          "name": "아토르바스타틴",
+          "dose": "10mg",
+          "usage": "고지혈증"
+        },
+        {
+          "name": "암로디핀",
+          "dose": "5mg",
+          "usage": "고혈압"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "고혈압",
+          "고지혈증"
+        ]
+      }
     }
   },
   {
@@ -828,6 +943,32 @@
           }
         ]
       }
+    },
+    "input": {
+      "cognito_id": "test-G-005",
+      "intake_purpose": "혈당 관리, 피로 개선",
+      "codef_health_data": {
+        "비타민B12": 280.0,
+        "25-OH 비타민D": 18.0
+      },
+      "medication_info": [
+        {
+          "name": "메트포르민",
+          "dose": "500mg",
+          "usage": "2형 당뇨 치료"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "2형 당뇨"
+        ]
+      }
     }
   },
   {
@@ -891,6 +1032,33 @@
       },
       "step3": {
         "recommendations": []
+      }
+    },
+    "input": {
+      "cognito_id": "test-G-006",
+      "intake_purpose": "심혈관 건강",
+      "codef_health_data": {
+        "25-OH 비타민D": 35.0,
+        "비타민B12": 450.0,
+        "페리틴": 60.0
+      },
+      "medication_info": [
+        {
+          "name": "아토르바스타틴",
+          "dose": "10mg",
+          "usage": "고지혈증 치료"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "고지혈증"
+        ]
       }
     }
   }

@@ -53,8 +53,8 @@ def _get_kb():
     if _vectors is not None:
         return _vectors, _texts
 
-    vectors_path = f"{settings.KB_LOCAL_PATH}/lpi_kb.npz"
-    texts_path = f"{settings.KB_LOCAL_PATH}/lpi_kb_texts.json"
+    vectors_path = f"{settings.KB_LOCAL_PATH}/lpi_kb_ko.npz"
+    texts_path = f"{settings.KB_LOCAL_PATH}/lpi_kb_texts_ko.json"
 
     _vectors = np.load(vectors_path)["vectors"]
     with open(texts_path, encoding="utf-8") as f:
@@ -79,15 +79,24 @@ def retrieve(query: str) -> str:
         similarities = vectors @ query_vec
         top_indices = np.argsort(similarities)[::-1][:settings.KB_TOP_K]
 
-        docs = [texts["documents"][i] for i in top_indices]
-        if not docs:
+        chunks = []
+        for i in top_indices:
+            doc = texts["documents"][i]
+            meta = texts["metadatas"][i] if "metadatas" in texts else {}
+            if meta:
+                header = f"[영양소: {meta.get('base_nutrient', '')} | 유형: {meta.get('interaction_type', '')}]"
+                chunks.append(f"{header}\n{doc}")
+            else:
+                chunks.append(doc)
+
+        if not chunks:
             logger.info(f"[KB] 검색 결과 없음: {query}")
             kb_chunks_retrieved_counter.add(0, {"agent_name": "analysis-agent"})
             return ""
 
-        context = "\n\n".join(docs)
-        logger.info(f"[KB] {len(docs)}개 청크 검색됨 (query: {query[:50]})")
-        kb_chunks_retrieved_counter.add(len(docs), {"agent_name": "analysis-agent"})
+        context = "\n\n".join(chunks)
+        logger.info(f"[KB] {len(chunks)}개 청크 검색됨 (query: {query[:50]})")
+        kb_chunks_retrieved_counter.add(len(chunks), {"agent_name": "analysis-agent"})
         return context
 
     except Exception as e:
