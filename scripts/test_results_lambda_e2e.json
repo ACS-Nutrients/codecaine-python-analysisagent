@@ -1,0 +1,975 @@
+[
+  {
+    "case_id": "LM-001",
+    "test_focus": "IU 단위 비타민D — 부분 복용(400IU), 갭 잔존 → 비타민D 추천 포함",
+    "rule_results": [
+      {
+        "rule": "비타민D 결핍(14.2 ng/mL) + 400IU 부분 복용 → 갭 잔존, required_nutrients에 비타민D 포함",
+        "passed": true
+      }
+    ],
+    "safety_results": [],
+    "overall": "PASS",
+    "agent_output": {
+      "cognito_id": "test-lm-001",
+      "step1": {
+        "required_nutrients": [
+          {
+            "name_ko": "비타민 D",
+            "name_en": "Vitamin D",
+            "rda_amount": "800",
+            "unit": "IU",
+            "reason": "[혈액검사 근거]: 검진 결과 25-OH 비타민D 수치가 14.2로 심각한 결핍 상태입니다. 정상 범위(30-100ng/mL)에 크게 못 미치는 수준으로, 즉각적인 보충이 필요합니다."
+          },
+          {
+            "name_ko": "마그네슘",
+            "name_en": "Magnesium",
+            "rda_amount": "350",
+            "unit": "mg",
+            "reason": "[섭취 목적]: 마그네슘은 에너지 대사와 근육 기능에 중요한 역할을 하며, 피로 개선에 도움을 줄 수 있습니다."
+          }
+        ],
+        "summary": {
+          "overall_assessment": "안녕하세요. 35세 남성분의 건강 상태를 살펴보았습니다. 피로 개선을 원하신다고 들었는데, 많이 힘드셨겠어요. 검진 결과를 보니 피로의 주요 원인 중 하나를 찾을 수 있었습니다. 25-OH 비타민D 수치가 14.2ng/mL로 정상 범위(30-100ng/mL)에 비해 매우 낮은 상태입니다. 이는 심각한 비타민D 결핍을 나타내며, 이로 인해 피로감, 근육 약화, 면역력 저하 등이 나타날 수 있어요. 현재 하루 400IU의 비타민D를 섭취하고 계시지만, 이 용량으로는 결핍을 해소하기에 충분하지 않습니다. 비타민D 외에도 마그네슘과 같은 영양소가 에너지 대사에 중요한 역할을 하므로 함께 고려해볼 필요가 있습니다. 걱정하지 마세요. 적절한 영양 보충과 생활 습관 개선을 통해 피로를 효과적으로 관리할 수 있을 거예요. 함께 건강을 회복해 나가봐요.",
+          "key_concerns": [
+            "비타민D 심각한 결핍 — 즉각적인 보충 필요",
+            "피로 개선을 위한 종합적인 영양 관리 필요"
+          ],
+          "lifestyle_notes": {
+            "diet": "비타민D가 풍부한 식품을 식단에 포함시켜 주세요. 연어, 고등어와 같은 지방이 풍부한 생선을 주 2-3회 섭취하고, 달걀 노른자, 버섯 등도 자주 드세요. 마그네슘이 풍부한 식품으로는 시금치, 아몬드, 아보카도, 검은콩 등을 매일 한 끼 이상 포함시키는 것이 좋습니다.",
+            "exercise": "규칙적인 운동은 피로 개선에 큰 도움이 됩니다. 특히 야외에서의 가벼운 운동은 비타민D 합성에도 도움이 되어 일석이조예요. 하루 30분 이상 햇빛을 받으며 걷기나 조깅을 해보세요. 주 3-4회 정도가 적당합니다.",
+            "sleep": "충분한 수면은 피로 회복에 필수적입니다. 매일 7-9시간의 수면을 취하도록 하세요. 취침 전 마그네슘 보충제를 섭취하면 수면의 질 개선에 도움이 될 수 있습니다.",
+            "supplement_timing": "비타민D는 지용성 비타민이므로 식사와 함께 섭취하면 흡수율이 높아집니다. 아침이나 점심 식사 때 복용하는 것이 좋아요. 마그네슘은 저녁 식사 후나 취침 전에 섭취하면 수면 개선에 도움이 될 수 있습니다."
+          },
+          "risk_warnings": []
+        }
+      },
+      "step2": {
+        "gaps": []
+      },
+      "step3": {
+        "recommendations": []
+      }
+    }
+  },
+  {
+    "case_id": "LM-002",
+    "test_focus": "IU 단위 비타민D — 고용량 단일 복용(1000IU > RDA 800IU), 갭 0 → 추가 추천 금지",
+    "rule_results": [],
+    "safety_results": [
+      {
+        "violation": "비타민D 현재 섭취(1000IU)가 RDA(800IU) 초과임에도 비타민D 제품 추가 추천",
+        "passed": true
+      }
+    ],
+    "overall": "PASS",
+    "agent_output": {
+      "cognito_id": "test-lm-002",
+      "step1": {
+        "required_nutrients": [
+          {
+            "name_ko": "비타민 D",
+            "name_en": "Vitamin D",
+            "rda_amount": "1000",
+            "unit": "IU",
+            "reason": "[혈액검사 근거]: 혈중 25-OH 비타민D 수치가 14.2ng/mL로 심각한 결핍 상태 (정상 범위: 30-100ng/mL)"
+          },
+          {
+            "name_ko": "비타민 B 복합체",
+            "name_en": "Vitamin B Complex",
+            "rda_amount": "100",
+            "unit": "mg",
+            "reason": "[섭취 목적]: 피로 개선에 도움이 되는 필수 영양소"
+          }
+        ],
+        "summary": {
+          "overall_assessment": "안녕하세요. 35세 남성분의 건강 상태를 살펴보았습니다. 피로 개선을 원하셨는데, 검진 결과를 보니 그 이유를 어느 정도 짐작할 수 있을 것 같습니다. 혈중 25-OH 비타민D 수치가 14.2ng/mL로 나왔는데, 이는 정상 범위(30-100ng/mL)에 크게 못 미치는 심각한 결핍 상태입니다. 비타민 D 결핍은 피로감, 근육 약화, 면역력 저하 등 다양한 건강 문제를 일으킬 수 있어요. 현재 비타민 D 1000IU를 섭취 중이신데, 이 정도로는 결핍을 해소하기에 부족할 수 있습니다. 따라서 비타민 D 섭취량을 늘리고, 생활 습관을 개선하는 것이 매우 중요합니다. 또한 피로 개선을 위해 비타민 B 복합체도 함께 고려해볼 만합니다. 지금부터 적극적으로 관리하면 피로감이 개선되고 전반적인 건강 상태가 좋아질 거예요. 함께 건강을 회복해 나가봐요.",
+          "key_concerns": [
+            "비타민 D 심각한 결핍 — 적극적인 보충 필요"
+          ],
+          "lifestyle_notes": {
+            "diet": "비타민 D가 풍부한 식품을 더 많이 섭취하세요. 연어, 고등어 등의 지방이 많은 생선을 주 2-3회 먹고, 달걀 노른자, 버섯류도 자주 드세요. 비타민 B가 풍부한 전곡류, 견과류, 콩류, 녹색 잎채소도 매일 섭취하는 것이 좋습니다.",
+            "exercise": "규칙적인 야외 운동을 하세요. 햇빛을 받으며 하는 가벼운 산책이나 조깅을 주 3-4회, 15-30분씩 하면 비타민 D 합성에 도움이 됩니다. 또한 적당한 운동은 피로 해소에도 효과적입니다.",
+            "sleep": "충분한 수면은 피로 회복에 필수적입니다. 매일 7-8시간의 숙면을 취하세요. 취침 전 전자기기 사용을 줄이고, 일정한 시간에 자고 일어나는 습관을 들이세요.",
+            "supplement_timing": "비타민 D는 지용성 비타민이므로 식사와 함께 섭취하면 흡수율이 높아집니다. 아침이나 점심 식사 때 복용하는 것이 좋습니다. 비타민 B 복합체는 수용성이라 언제 먹어도 괜찮지만, 에너지 대사에 관여하므로 아침에 먹는 것이 피로 개선에 도움될 수 있습니다."
+          },
+          "risk_warnings": []
+        }
+      },
+      "step2": {
+        "gaps": []
+      },
+      "step3": {
+        "recommendations": [
+          {
+            "rank": 1,
+            "product_id": 171,
+            "product_name": "Thorne, 종합비타민 엘리트, AM & PM, 2병, 각 캡슐 90정",
+            "product_brand": "Thorne (쏜)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민A",
+              "티아민",
+              "리보플라빈",
+              "나이아신",
+              "엽산",
+              "비타민B12",
+              "판토텐산",
+              "칼슘",
+              "아연",
+              "비타민C",
+              "마그네슘",
+              "비타민D",
+              "비타민E",
+              "비오틴",
+              "비타민K",
+              "비타민B6",
+              "요오드",
+              "셀레늄",
+              "망간",
+              "크로뮴",
+              "보론",
+              "루테인",
+              "구리"
+            ]
+          },
+          {
+            "rank": 2,
+            "product_id": 47,
+            "product_name": "Thorne, 기본 영양소 2/데이, 캡슐 60정",
+            "product_brand": "Thorne",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민A",
+              "티아민",
+              "리보플라빈",
+              "나이아신",
+              "엽산",
+              "비타민B12",
+              "판토텐산",
+              "칼슘",
+              "아연",
+              "비타민C",
+              "마그네슘",
+              "비타민D",
+              "비타민E",
+              "비오틴",
+              "비타민K",
+              "비타민B6",
+              "요오드",
+              "셀레늄",
+              "망간",
+              "크로뮴",
+              "보론",
+              "루테인",
+              "구리"
+            ]
+          },
+          {
+            "rank": 3,
+            "product_id": 196,
+            "product_name": "NaturesPlus, Hema-Plex®, 서방형 미니 정제 60정",
+            "product_brand": "NaturesPlus (네이처스플러스)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "엽산",
+              "칼륨",
+              "칼슘",
+              "티아민",
+              "리보플라빈",
+              "비타민B12",
+              "비타민B6",
+              "나이아신",
+              "철분",
+              "구리",
+              "망간",
+              "아연",
+              "셀레늄",
+              "판토텐산",
+              "비타민C",
+              "비타민E"
+            ]
+          },
+          {
+            "rank": 4,
+            "product_id": 206,
+            "product_name": "Nature's Way, Alive!® 여성용 구미젤리 종합비타민, 혼합 베리맛, 구미젤리 150개",
+            "product_brand": "Nature's Way (네이처스 웨이)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "보론",
+              "인",
+              "비오틴",
+              "아연",
+              "엽산",
+              "칼슘",
+              "요오드",
+              "이노시톨",
+              "판토텐산",
+              "비타민A",
+              "비타민B12",
+              "비타민B6",
+              "비타민C",
+              "비타민D3",
+              "비타민E",
+              "나이아신"
+            ]
+          },
+          {
+            "rank": 5,
+            "product_id": 239,
+            "product_name": "Bob's Red Mill, 라지 플레이크 영양 효모, 글루텐 무함유, 142g(5oz)",
+            "product_brand": "Bob's Red Mill (밥스 레드 밀)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "엽산",
+              "칼륨",
+              "칼슘",
+              "티아민",
+              "리보플라빈",
+              "비타민B12",
+              "비타민B6",
+              "나이아신"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case_id": "LM-003",
+    "test_focus": "serving_per_day=2 배수 반영 — 500IU × 2회 = 1000IU, 갭 0 → 추가 추천 금지",
+    "rule_results": [],
+    "safety_results": [
+      {
+        "violation": "serving_per_day=2 미적용 — 500IU만 계산해 갭이 있다고 오판, 비타민D 추가 추천",
+        "passed": true
+      }
+    ],
+    "overall": "PASS",
+    "agent_output": {
+      "cognito_id": "test-lm-003",
+      "step1": {
+        "required_nutrients": [
+          {
+            "name_ko": "비타민 D",
+            "name_en": "Vitamin D",
+            "rda_amount": "1000",
+            "unit": "IU",
+            "reason": "[혈액검사 근거]: 혈중 25-OH 비타민D 수치가 14.2로 심각한 결핍 상태 (정상 범위 30-100 ng/mL)"
+          }
+        ],
+        "summary": {
+          "overall_assessment": "안녕하세요. 최근 피로감으로 힘들어하고 계신 것 같아 걱정이 되네요. 건강검진 결과를 보니 피로의 주요 원인 중 하나를 찾을 수 있었습니다. 혈중 비타민 D 수치가 14.2 ng/mL로 정상 범위(30-100 ng/mL)에 비해 매우 낮은 상태입니다. 이는 심각한 비타민 D 결핍을 나타내며, 이로 인해 피로감, 근육 약화, 면역력 저하 등을 경험하실 수 있어요. 현재 하루 1000 IU의 비타민 D를 섭취하고 계시지만, 결핍 상태를 개선하기 위해서는 더 높은 용량이 필요할 것 같습니다. 하지만 너무 걱정하지 마세요. 적절한 보충과 생활 습관 개선을 통해 비타민 D 수치를 정상화하고 피로를 개선할 수 있습니다. 함께 건강을 회복해 나가봐요.",
+          "key_concerns": [
+            "비타민 D 심각한 결핍 — 적극적인 보충 필요"
+          ],
+          "lifestyle_notes": {
+            "diet": "비타민 D가 풍부한 식품을 식단에 포함해 보세요. 연어, 고등어 등의 지방이 많은 생선을 주 2-3회 섭취하고, 달걀 노른자, 버섯류도 자주 드시면 좋습니다. 비타민 D 강화 우유나 요구르트도 좋은 선택입니다.",
+            "exercise": "야외 활동을 늘려 자연 햇빛에 노출되는 시간을 증가시키세요. 매일 15-20분 정도 팔과 다리를 노출한 채 산책을 하는 것만으로도 비타민 D 합성에 도움이 됩니다. 점심 시간을 이용해 짧은 외출을 하는 것도 좋은 방법입니다.",
+            "sleep": "충분한 수면은 피로 회복에 필수적입니다. 매일 7-8시간의 수면을 취하도록 노력하세요. 비타민 D는 수면의 질과도 연관이 있어, 적절한 보충이 수면 개선에도 도움이 될 수 있습니다.",
+            "supplement_timing": "비타민 D는 지용성 비타민이므로 식사와 함께 섭취하면 흡수율이 높아집니다. 아침이나 점심 식사 때 복용하는 것이 좋습니다. 저녁에 복용하면 수면에 영향을 줄 수 있으므로 피하는 것이 좋아요."
+          },
+          "risk_warnings": []
+        }
+      },
+      "step2": {
+        "gaps": []
+      },
+      "step3": {
+        "recommendations": [
+          {
+            "rank": 1,
+            "product_id": 171,
+            "product_name": "Thorne, 종합비타민 엘리트, AM & PM, 2병, 각 캡슐 90정",
+            "product_brand": "Thorne (쏜)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민A",
+              "티아민",
+              "리보플라빈",
+              "나이아신",
+              "엽산",
+              "비타민B12",
+              "판토텐산",
+              "칼슘",
+              "아연",
+              "비타민C",
+              "마그네슘",
+              "비타민D",
+              "비타민E",
+              "비오틴",
+              "비타민K",
+              "비타민B6",
+              "요오드",
+              "셀레늄",
+              "망간",
+              "크로뮴",
+              "보론",
+              "루테인",
+              "구리"
+            ]
+          },
+          {
+            "rank": 2,
+            "product_id": 47,
+            "product_name": "Thorne, 기본 영양소 2/데이, 캡슐 60정",
+            "product_brand": "Thorne",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민A",
+              "티아민",
+              "리보플라빈",
+              "나이아신",
+              "엽산",
+              "비타민B12",
+              "판토텐산",
+              "칼슘",
+              "아연",
+              "비타민C",
+              "마그네슘",
+              "비타민D",
+              "비타민E",
+              "비오틴",
+              "비타민K",
+              "비타민B6",
+              "요오드",
+              "셀레늄",
+              "망간",
+              "크로뮴",
+              "보론",
+              "루테인",
+              "구리"
+            ]
+          },
+          {
+            "rank": 3,
+            "product_id": 206,
+            "product_name": "Nature's Way, Alive!® 여성용 구미젤리 종합비타민, 혼합 베리맛, 구미젤리 150개",
+            "product_brand": "Nature's Way (네이처스 웨이)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "보론",
+              "비오틴",
+              "아연",
+              "엽산",
+              "칼슘",
+              "요오드",
+              "이노시톨",
+              "판토텐산",
+              "비타민A",
+              "비타민B12",
+              "비타민B6",
+              "비타민C",
+              "비타민D",
+              "비타민E",
+              "나이아신"
+            ]
+          },
+          {
+            "rank": 4,
+            "product_id": 196,
+            "product_name": "NaturesPlus, Hema-Plex®, 서방형 미니 정제 60정",
+            "product_brand": "NaturesPlus (네이처스플러스)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "엽산",
+              "구리",
+              "망간",
+              "아연",
+              "셀레늄",
+              "티아민",
+              "판토텐산",
+              "리보플라빈",
+              "비타민B12",
+              "비타민B6",
+              "비타민C",
+              "비타민E",
+              "나이아신"
+            ]
+          },
+          {
+            "rank": 5,
+            "product_id": 149,
+            "product_name": "L'il Critters, 구미 바이트 완전 종합 비타민(Gummy Vites Complete Multivitamin), 구미 70 개",
+            "product_brand": "L'il Critters (릴 크리터스)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민C",
+              "비타민E",
+              "비타민B6",
+              "비타민D",
+              "비타민A",
+              "비타민B12",
+              "루테인",
+              "비오틴",
+              "아연",
+              "엽산",
+              "요오드",
+              "이노시톨",
+              "판토텐산"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case_id": "LM-004",
+    "test_focus": "mcg 단위 B12 — 부분 복용(1.2mcg), 갭 잔존 → B12 추천 포함",
+    "rule_results": [
+      {
+        "rule": "B12 결핍(150 pg/mL) + 1.2mcg 부분 복용 → 갭 잔존, required_nutrients에 B12 포함",
+        "passed": true
+      }
+    ],
+    "safety_results": [],
+    "overall": "PASS",
+    "agent_output": {
+      "cognito_id": "test-lm-004",
+      "step1": {
+        "required_nutrients": [
+          {
+            "name_ko": "비타민 B12",
+            "name_en": "Vitamin B12",
+            "rda_amount": "2.4",
+            "unit": "mcg",
+            "reason": "[혈액검사 근거]: 혈중 비타민 B12 수치가 150pg/mL로, 정상 범위(200-900pg/mL) 미만으로 결핍 상태입니다."
+          },
+          {
+            "name_ko": "비타민 B6",
+            "name_en": "Vitamin B6",
+            "rda_amount": "1.4",
+            "unit": "mg",
+            "reason": "[섭취 목적]: 에너지 대사에 중요한 역할을 하며, 비타민 B12와 함께 섭취 시 시너지 효과가 있습니다."
+          }
+        ],
+        "summary": {
+          "overall_assessment": "안녕하세요. 40세 여성분의 건강 상태와 에너지 개선 목표에 대해 살펴보았습니다. 현재 혈액 검사 결과를 보니, 비타민 B12 수치가 150pg/mL로 정상 범위(200-900pg/mL)보다 낮은 상태입니다. 이는 에너지 부족과 피로감을 느끼시는 원인 중 하나일 수 있습니다. 비타민 B12는 적혈구 생성과 신경 기능에 중요한 역할을 하므로, 결핍 시 피로, 무기력, 집중력 저하 등의 증상이 나타날 수 있어요. 현재 복용 중인 비타민 B12 보충제의 용량(1.2mcg)이 충분하지 않아 보입니다. 비타민 B12와 함께 비타민 B6도 에너지 대사에 중요한 역할을 하므로 함께 보충하면 더 효과적일 수 있습니다. 적절한 영양 보충과 생활 습관 개선을 통해 에너지 수준을 높일 수 있을 거예요. 함께 건강한 변화를 만들어가 보아요.",
+          "key_concerns": [
+            "비타민 B12 결핍 — 신경 기능 및 에너지 대사에 영향 가능"
+          ],
+          "lifestyle_notes": {
+            "diet": "비타민 B12가 풍부한 식품을 적극적으로 섭취하세요. 달걀, 우유, 요구르트 등 유제품과 생선(특히 연어, 참치), 소고기, 닭고기 등의 육류를 매일 섭취하는 것이 좋습니다. 채식주의자의 경우 영양효모, 강화된 식물성 우유, 시리얼 등을 통해 보충할 수 있습니다.",
+            "exercise": "규칙적인 운동은 에너지 수준을 높이는 데 도움이 됩니다. 매일 30분 이상의 중강도 유산소 운동(빠른 걷기, 조깅, 수영 등)을 권장합니다. 주 2-3회 근력 운동을 병행하면 더욱 좋습니다.",
+            "sleep": "충분한 수면은 에너지 회복에 필수적입니다. 매일 7-9시간의 수면을 취하고, 일정한 시간에 자고 일어나는 습관을 들이세요. 취침 전 전자기기 사용을 줄이고, 편안한 수면 환경을 조성하세요.",
+            "supplement_timing": "비타민 B12는 아침 식사와 함께 섭취하는 것이 좋습니다. 비타민 B6는 음식과 함께 섭취하면 흡수율이 높아집니다. 두 영양소를 함께 섭취하면 시너지 효과를 볼 수 있어요."
+          },
+          "risk_warnings": []
+        }
+      },
+      "step2": {
+        "gaps": []
+      },
+      "step3": {
+        "recommendations": [
+          {
+            "rank": 1,
+            "product_id": 171,
+            "product_name": "Thorne, 종합비타민 엘리트, AM & PM, 2병, 각 캡슐 90정",
+            "product_brand": "Thorne (쏜)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민A",
+              "비타민B6",
+              "비타민B12",
+              "비타민C",
+              "비타민D",
+              "비타민E",
+              "비타민K",
+              "티아민",
+              "리보플라빈",
+              "나이아신",
+              "엽산",
+              "판토텐산",
+              "비오틴",
+              "칼슘",
+              "마그네슘",
+              "아연",
+              "요오드",
+              "셀레늄",
+              "구리",
+              "망간",
+              "크로뮴",
+              "보론",
+              "루테인"
+            ]
+          },
+          {
+            "rank": 2,
+            "product_id": 166,
+            "product_name": "California Gold Nutrition, 오메가3 피쉬 오일, Vivomega 트리글리세리드, 1,000mg, 피쉬 소프트젤 240정",
+            "product_brand": "California Gold Nutrition (캘리포니아 골드 뉴트리션)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "DHA",
+              "EPA",
+              "오메가3"
+            ]
+          },
+          {
+            "rank": 3,
+            "product_id": 159,
+            "product_name": "Country Life, 킬레이트화 마그네슘 글리신산, 180정(1정당 133mg)",
+            "product_brand": "Country Life (컨트리 라이프)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "마그네슘"
+            ]
+          },
+          {
+            "rank": 4,
+            "product_id": 147,
+            "product_name": "California Gold Nutrition, C-1000 & 아연 면역력, 베지 캡슐 120정",
+            "product_brand": "California Gold Nutrition (캘리포니아 골드 뉴트리션)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민C",
+              "아연"
+            ]
+          },
+          {
+            "rank": 5,
+            "product_id": 146,
+            "product_name": "Nutricost, 셀레늄, 200mcg, 캡슐 240정",
+            "product_brand": "Nutricost (뉴트리코스트)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "셀레늄"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case_id": "LM-005",
+    "test_focus": "복수 영양제 동일 영양소 누적 합산 — 400IU + 600IU = 1000IU, 갭 0 → 추가 추천 금지",
+    "rule_results": [],
+    "safety_results": [
+      {
+        "violation": "복수 영양제 비타민D 누적 미합산 — 400IU + 600IU = 1000IU인데 갭 있다고 오판",
+        "passed": true
+      }
+    ],
+    "overall": "PASS",
+    "agent_output": {
+      "cognito_id": "test-lm-005",
+      "step1": {
+        "required_nutrients": [
+          {
+            "name_ko": "비타민 D",
+            "name_en": "Vitamin D",
+            "rda_amount": "2000",
+            "unit": "IU",
+            "reason": "[혈액검사 근거]: 25-OH 비타민D 수치가 14.2 ng/mL로 심각한 결핍 상태 (정상 범위 30-100 ng/mL)"
+          },
+          {
+            "name_ko": "아연",
+            "name_en": "Zinc",
+            "rda_amount": "11",
+            "unit": "mg",
+            "reason": "[섭취 목적]: 면역 강화에 중요한 역할을 하는 필수 미네랄"
+          }
+        ],
+        "summary": {
+          "overall_assessment": "안녕하세요. 면역 강화를 원하셨는데, 건강검진 결과를 보니 비타민 D 수치가 많이 낮아 걱정이 되네요. 비타민 D는 14.2 ng/mL로 정상 범위(30-100 ng/mL)에 크게 못 미치는 심각한 결핍 상태입니다. 비타민 D는 면역 체계 강화에 매우 중요한 역할을 하므로, 이 부분을 개선하는 것이 면역력 향상에 큰 도움이 될 거예요. 현재 비타민 D 영양제를 복용 중이시지만, 용량이 충분하지 않아 보입니다. 비타민 D 외에도 아연과 같은 다른 영양소들도 면역력 강화에 도움이 될 수 있어요. 지금부터 적절한 영양 보충과 생활 습관 개선을 통해 면역력을 높이고 전반적인 건강 상태를 개선할 수 있을 거예요. 함께 건강한 변화를 만들어 나가 봐요!",
+          "key_concerns": [
+            "비타민 D 심각한 결핍 — 면역력 저하 및 전반적 건강 악화 위험"
+          ],
+          "lifestyle_notes": {
+            "diet": "비타민 D가 풍부한 식품을 자주 섭취하세요. 연어, 고등어, 참치와 같은 지방이 많은 생선을 주 2-3회 섭취하고, 달걀 노른자, 버섯류도 매일 식단에 포함시키세요. 아연이 풍부한 굴, 소고기, 닭고기, 호박씨, 캐슈넛 등도 자주 드시면 좋아요.",
+            "exercise": "규칙적인 운동은 면역력 강화에 도움이 됩니다. 특히 야외에서 하는 운동은 비타민 D 합성에도 좋아요. 매일 20-30분씩 햇빛을 받으며 걷기 운동을 하시고, 주 3-4회 30분 이상의 유산소 운동을 하세요.",
+            "sleep": "충분한 수면은 면역 체계 유지에 필수적입니다. 매일 7-9시간의 수면을 취하세요. 취침 전 2시간 동안은 블루라이트를 차단하고, 일정한 시간에 자고 일어나는 습관을 들이세요.",
+            "supplement_timing": "비타민 D는 지용성 비타민이므로 식사와 함께 복용하면 흡수율이 높아집니다. 아침이나 점심 식사 때 복용하는 것이 좋아요. 아연은 공복에 복용하면 흡수율이 높지만, 위장에 부담을 줄 수 있으므로 식후에 복용하세요."
+          },
+          "risk_warnings": []
+        }
+      },
+      "step2": {
+        "gaps": []
+      },
+      "step3": {
+        "recommendations": [
+          {
+            "rank": 1,
+            "product_id": 47,
+            "product_name": "Thorne, 기본 영양소 2/데이, 캡슐 60정",
+            "product_brand": "Thorne",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민A",
+              "티아민",
+              "리보플라빈",
+              "나이아신",
+              "엽산",
+              "비타민B12",
+              "판토텐산",
+              "칼슘",
+              "아연",
+              "비타민C",
+              "마그네슘",
+              "비타민D",
+              "비타민E",
+              "비오틴",
+              "비타민K",
+              "비타민B6",
+              "요오드",
+              "셀레늄",
+              "망간",
+              "크로뮴",
+              "보론",
+              "루테인",
+              "구리"
+            ]
+          },
+          {
+            "rank": 2,
+            "product_id": 21,
+            "product_name": "21st Century, 칼슘 마그네슘 아연 + D3, 90정",
+            "product_brand": "21st Century",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "칼슘",
+              "비타민D3",
+              "아연",
+              "마그네슘"
+            ]
+          },
+          {
+            "rank": 3,
+            "product_id": 7,
+            "product_name": "California Gold Nutrition, Gold C®, USP 등급 비타민C, 1,000mg, 베지 캡슐 60정",
+            "product_brand": "California Gold Nutrition",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민C"
+            ]
+          },
+          {
+            "rank": 4,
+            "product_id": 1,
+            "product_name": "California Gold Nutrition, 오메가3 프리미엄 피쉬 오일, 피쉬 젤라틴 소프트젤 100정(소프트젤당 1,100mg)",
+            "product_brand": "California Gold Nutrition",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "DHA",
+              "EPA",
+              "오메가3"
+            ]
+          },
+          {
+            "rank": 5,
+            "product_id": 31,
+            "product_name": "NOW Foods, 철분, 36mg, 베지 캡슐 90정",
+            "product_brand": "NOW Foods",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "철분"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case_id": "LM-006",
+    "test_focus": "복합 결핍 — 비타민D 갭 잔존 + 아연 완전 충족, 선택적 추천 검증",
+    "rule_results": [
+      {
+        "rule": "비타민D 결핍 + 현재 미복용 → 갭 잔존, step1 required_nutrients에 비타민D 포함",
+        "passed": true
+      }
+    ],
+    "safety_results": [
+      {
+        "violation": "아연 이미 충분 복용(15mg > RDA 10mg)임에도 아연 제품 추가 추천",
+        "passed": true
+      }
+    ],
+    "overall": "PASS",
+    "agent_output": {
+      "cognito_id": "test-lm-006",
+      "step1": {
+        "required_nutrients": [
+          {
+            "name_ko": "비타민 D",
+            "name_en": "Vitamin D",
+            "rda_amount": "800",
+            "unit": "IU",
+            "reason": "[혈액검사 근거]: 혈중 25-OH 비타민D 수치가 14.2ng/mL로, 정상 범위(30-100ng/mL)보다 매우 낮음"
+          },
+          {
+            "name_ko": "비타민 C",
+            "name_en": "Vitamin C",
+            "rda_amount": "100",
+            "unit": "mg",
+            "reason": "[섭취 목적]: 면역 체계 강화에 필수적인 항산화 영양소"
+          }
+        ],
+        "summary": {
+          "overall_assessment": "안녕하세요. 30세 남성분의 건강 상태를 살펴보았습니다. 면역 강화를 원하셨는데, 이는 매우 중요한 목표입니다. 현재 가장 눈에 띄는 점은 비타민 D 수치가 14.2ng/mL로 정상 범위(30-100ng/mL)에 비해 상당히 낮다는 것입니다. 비타민 D는 면역 체계 유지에 중요한 역할을 하므로, 이 부분을 개선하는 것이 우선순위가 되어야 할 것 같습니다. 현재 아연을 섭취 중이신 것은 면역력 강화에 도움이 될 수 있어 좋습니다. 하지만 비타민 D 수치 개선과 함께 다른 면역 강화 영양소도 고려해볼 필요가 있습니다. 지금부터 균형 잡힌 영양 섭취와 생활 습관 개선을 통해 면역력을 높이고 전반적인 건강 상태를 개선할 수 있을 것입니다. 함께 건강한 변화를 만들어가 보아요.",
+          "key_concerns": [
+            "비타민 D 심각한 결핍 — 즉각적인 보충 필요"
+          ],
+          "lifestyle_notes": {
+            "diet": "비타민 D가 풍부한 식품을 식단에 포함시키세요. 연어, 고등어 같은 지방이 많은 생선을 주 2-3회 섭취하고, 달걀 노른자, 버섯류도 자주 드세요. 비타민 C가 풍부한 과일과 채소도 매일 섭취하세요. 오렌지, 키위, 딸기, 브로콜리, 파프리카 등이 좋습니다.",
+            "exercise": "규칙적인 야외 운동을 하세요. 하루 15-30분 정도 햇빛을 받으며 걷기나 조깅을 하면 비타민 D 합성에 도움이 됩니다. 또한, 적당한 강도의 유산소 운동은 면역 체계를 강화하는 데 도움이 됩니다.",
+            "sleep": "충분한 수면은 면역력 유지에 중요합니다. 매일 7-9시간의 수면을 취하도록 하세요. 취침 전 전자기기 사용을 줄이고, 규칙적인 수면 시간을 유지하세요.",
+            "supplement_timing": "비타민 D는 지용성 비타민이므로 식사와 함께 섭취하면 흡수율이 높아집니다. 아침이나 점심 식사와 함께 복용하는 것이 좋습니다. 비타민 C는 수용성이므로 언제든 섭취 가능하지만, 하루에 나눠서 복용하면 흡수율을 높일 수 있습니다."
+          },
+          "risk_warnings": []
+        }
+      },
+      "step2": {
+        "gaps": []
+      },
+      "step3": {
+        "recommendations": []
+      }
+    }
+  },
+  {
+    "case_id": "LM-007",
+    "test_focus": "IU 단위 없이 mg으로만 비타민D 복용 — mg 단위 갭 계산 정확도",
+    "rule_results": [
+      {
+        "rule": "비타민D 0.01mg 복용 → RDA 0.02mg 대비 갭 잔존, required_nutrients에 포함",
+        "passed": true
+      }
+    ],
+    "safety_results": [],
+    "overall": "PASS",
+    "agent_output": {
+      "cognito_id": "test-lm-007",
+      "step1": {
+        "required_nutrients": [
+          {
+            "name_ko": "비타민 D",
+            "name_en": "Vitamin D",
+            "rda_amount": "800",
+            "unit": "IU",
+            "reason": "[혈액검사 근거]: 혈중 25-OH 비타민D 수치가 14.2ng/mL로 심각한 결핍 상태 (정상 범위 30-100ng/mL)"
+          }
+        ],
+        "summary": {
+          "overall_assessment": "안녕하세요. 최근 피로감으로 힘들어하고 계신 것 같아 걱정이 됩니다. 검진 결과를 보니 비타민 D 수치가 14.2ng/mL로 정상 범위(30-100ng/mL)에 비해 매우 낮은 상태입니다. 이는 심각한 비타민 D 결핍을 나타내며, 이로 인해 피로감을 느끼고 계실 수 있어요. 비타민 D는 에너지 대사와 근육 기능에 중요한 역할을 하기 때문에, 결핍 시 전반적인 피로감과 무기력증을 경험할 수 있습니다. 현재 하루에 0.01mg(약 400IU)의 비타민 D를 섭취하고 계시지만, 이는 현재 상태를 개선하기에는 충분하지 않아 보입니다. 하지만 걱정하지 마세요. 적절한 보충과 생활 습관 개선을 통해 비타민 D 수치를 높이고 피로감을 개선할 수 있습니다. 함께 건강을 회복해 나가봐요.",
+          "key_concerns": [
+            "비타민 D 심각한 결핍 — 적극적인 보충 필요"
+          ],
+          "lifestyle_notes": {
+            "diet": "비타민 D가 풍부한 식품을 식단에 포함시켜 주세요. 연어, 고등어, 참치와 같은 지방이 많은 생선을 주 2-3회 섭취하세요. 달걀 노른자, 버섯류(특히 표고버섯)도 좋은 공급원입니다. 비타민 D가 강화된 우유나 요구르트도 매일 1-2잔 정도 드시면 도움이 됩니다.",
+            "exercise": "야외 활동을 늘려 자연 햇빛에 노출되는 시간을 증가시키세요. 매일 15-20분 정도 팔과 다리를 노출한 채 산책을 하는 것이 좋습니다. 점심 시간을 이용해 짧은 산책을 하는 것도 좋은 방법입니다. 단, 피부 건강을 위해 장시간 직사광선 노출은 피하고, 필요시 자외선 차단제를 사용하세요.",
+            "sleep": "충분한 수면은 피로 회복에 필수적입니다. 매일 7-9시간의 수면을 취하도록 노력하세요. 취침 전 2시간 동안은 블루라이트를 차단하고, 편안한 환경을 조성하세요. 비타민 D는 수면-각성 주기 조절에도 관여하므로, 적절한 보충이 수면의 질 개선에도 도움이 될 수 있습니다.",
+            "supplement_timing": "비타민 D는 지용성 비타민이므로 식사와 함께 섭취하면 흡수율이 높아집니다. 아침이나 점심 식사와 함께 복용하는 것이 좋습니다. 현재 복용량이 매우 적으므로, 의사와 상담 후 용량을 조절하는 것이 좋습니다."
+          },
+          "risk_warnings": []
+        }
+      },
+      "step2": {
+        "gaps": []
+      },
+      "step3": {
+        "recommendations": [
+          {
+            "rank": 1,
+            "product_id": 171,
+            "product_name": "Thorne, 종합비타민 엘리트, AM & PM, 2병, 각 캡슐 90정",
+            "product_brand": "Thorne (쏜)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민A",
+              "비타민B6",
+              "비타민B12",
+              "비타민C",
+              "비타민D",
+              "비타민E",
+              "비타민K",
+              "티아민",
+              "리보플라빈",
+              "나이아신",
+              "엽산",
+              "비오틴",
+              "판토텐산",
+              "칼슘",
+              "마그네슘",
+              "아연",
+              "요오드",
+              "셀레늄",
+              "망간",
+              "크로뮴",
+              "루테인"
+            ]
+          },
+          {
+            "rank": 2,
+            "product_id": 47,
+            "product_name": "Thorne, 기본 영양소 2/데이, 캡슐 60정",
+            "product_brand": "Thorne",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민A",
+              "비타민B6",
+              "비타민B12",
+              "비타민C",
+              "비타민D",
+              "비타민E",
+              "비타민K",
+              "티아민",
+              "리보플라빈",
+              "나이아신",
+              "엽산",
+              "비오틴",
+              "판토텐산",
+              "칼슘",
+              "마그네슘",
+              "아연",
+              "요오드",
+              "셀레늄",
+              "망간",
+              "크로뮴",
+              "루테인"
+            ]
+          },
+          {
+            "rank": 3,
+            "product_id": 196,
+            "product_name": "NaturesPlus, Hema-Plex®, 서방형 미니 정제 60정",
+            "product_brand": "NaturesPlus (네이처스플러스)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민B6",
+              "비타민B12",
+              "비타민C",
+              "비타민E",
+              "티아민",
+              "리보플라빈",
+              "나이아신",
+              "엽산",
+              "판토텐산",
+              "철분",
+              "아연",
+              "구리",
+              "망간",
+              "셀레늄"
+            ]
+          },
+          {
+            "rank": 4,
+            "product_id": 206,
+            "product_name": "Nature's Way, Alive!® 여성용 구미젤리 종합비타민, 혼합 베리맛, 구미젤리 150개",
+            "product_brand": "Nature's Way (네이처스 웨이)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민A",
+              "비타민B6",
+              "비타민B12",
+              "비타민C",
+              "비타민D",
+              "비타민E",
+              "비오틴",
+              "판토텐산",
+              "엽산",
+              "나이아신",
+              "아연",
+              "요오드",
+              "칼슘",
+              "보론"
+            ]
+          },
+          {
+            "rank": 5,
+            "product_id": 149,
+            "product_name": "L'il Critters, 구미 바이트 완전 종합 비타민(Gummy Vites Complete Multivitamin), 구미 70 개",
+            "product_brand": "L'il Critters (릴 크리터스)",
+            "recommend_serving": 1,
+            "serving_per_day": 1,
+            "covered_nutrients": [
+              "비타민A",
+              "비타민B6",
+              "비타민B12",
+              "비타민C",
+              "비타민D",
+              "비타민E",
+              "비오틴",
+              "판토텐산",
+              "엽산",
+              "아연",
+              "요오드",
+              "루테인"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case_id": "LM-008",
+    "test_focus": "mcg 단위 B12 — 고용량 복용(500mcg >> RDA 2.4mcg), 갭 0 → B12 추가 추천 금지",
+    "rule_results": [],
+    "safety_results": [
+      {
+        "violation": "B12 500mcg 복용(RDA 2.4mcg 대폭 초과)임에도 B12 추가 추천",
+        "passed": true
+      }
+    ],
+    "overall": "PASS",
+    "agent_output": {
+      "cognito_id": "test-lm-008",
+      "step1": {
+        "required_nutrients": [
+          {
+            "name_ko": "비타민 B12",
+            "name_en": "Vitamin B12",
+            "rda_amount": "2.4",
+            "unit": "mcg",
+            "reason": "[혈액검사 근거]: 검진 결과 비타민 B12 수치가 150pg/mL로, 정상 범위(200-900pg/mL) 미만입니다."
+          }
+        ],
+        "summary": {
+          "overall_assessment": "안녕하세요. 에너지 개선을 원하셨군요. 검진 결과를 보니 비타민 B12 수치가 150pg/mL로 정상 범위(200-900pg/mL)보다 낮게 나왔습니다. 비타민 B12는 에너지 대사와 신경 기능에 중요한 역할을 하는 영양소입니다. 수치가 낮으면 피로감, 무기력함을 느낄 수 있어요. 현재 비타민 B12 500mcg을 매일 복용 중이신데, 이는 좋은 선택이었습니다. 다만, 혈중 농도가 아직 낮은 것으로 보아 흡수에 문제가 있거나 보충 기간이 충분하지 않았을 수 있습니다. 걱정하지 마세요. 지속적인 보충과 함께 생활 습관 개선으로 에너지 레벨을 높일 수 있습니다. 함께 건강을 개선해 나가봐요.",
+          "key_concerns": [
+            "비타민 B12 수치 저하 — 지속적인 모니터링 및 보충 필요"
+          ],
+          "lifestyle_notes": {
+            "diet": "비타민 B12가 풍부한 식품을 식단에 포함해보세요. 소고기, 연어, 참치 등의 생선, 달걀, 우유, 요구르트 같은 유제품을 주 3-4회 이상 섭취하는 것이 좋습니다. 특히 아침 식사에 달걀이나 요구르트를 포함하면 좋아요.",
+            "exercise": "규칙적인 운동은 에너지 레벨을 높이는 데 도움이 됩니다. 매일 30분 이상의 걷기나 가벼운 조깅을 시작해보세요. 점진적으로 운동 강도를 높여가며 주 3-4회, 회당 45분 정도의 유산소 운동을 목표로 해보세요.",
+            "sleep": "충분한 수면은 에너지 회복에 필수적입니다. 매일 밤 7-8시간의 숙면을 취하도록 노력해보세요. 잠들기 전 2시간 동안은 블루라이트를 차단하고, 편안한 환경을 조성하는 것이 도움됩니다.",
+            "supplement_timing": "비타민 B12는 아침 식사와 함께 복용하는 것이 가장 효과적입니다. 위산 분비가 활발한 시간에 복용하면 흡수율이 높아집니다. 현재 복용 중인 비타민 B12 500mcg을 아침 식사와 함께 꾸준히 복용해주세요."
+          },
+          "risk_warnings": []
+        }
+      },
+      "step2": {
+        "gaps": []
+      },
+      "step3": {
+        "recommendations": []
+      }
+    }
+  }
+]

@@ -1,0 +1,55 @@
+{
+  "summary": {
+    "total_cases": 8,
+    "repeat": 3,
+    "total_runs": 24,
+    "pass_rate": "91.7%",
+    "stable_cases": 6,
+    "unstable_cases": [
+      "LM-005",
+      "LM-006"
+    ]
+  },
+  "details": {
+    "LM-001": [
+      "PASS",
+      "PASS",
+      "PASS"
+    ],
+    "LM-002": [
+      "PASS",
+      "PASS",
+      "PASS"
+    ],
+    "LM-003": [
+      "PASS",
+      "PASS",
+      "PASS"
+    ],
+    "LM-004": [
+      "PASS",
+      "PASS",
+      "PASS"
+    ],
+    "LM-005": [
+      "FAIL",
+      "PASS",
+      "PASS"
+    ],
+    "LM-006": [
+      "PASS",
+      "PASS",
+      "FAIL"
+    ],
+    "LM-007": [
+      "PASS",
+      "PASS",
+      "PASS"
+    ],
+    "LM-008": [
+      "PASS",
+      "PASS",
+      "PASS"
+    ]
+  }
+}

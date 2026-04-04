@@ -1,0 +1,294 @@
+[
+  {
+    "case_id": "LM-001",
+    "test_focus": "IU 단위 비타민D — 부분 복용(400IU), 갭 잔존 → 비타민D 추천 포함",
+    "description": "혈액검사 결핍 + 현재 400IU 복용. RDA 800IU 대비 갭 400IU 잔존 → step1에 비타민D 포함, step3에서 추가 보충 추천 필요",
+    "input": {
+      "cognito_id": "test-lm-001",
+      "user_profile": {
+        "age": 35,
+        "gender": "male",
+        "medications": [],
+        "intake_purpose": ["피로 개선"]
+      },
+      "codef_health_data": {
+        "25-OH 비타민D": 14.2
+      },
+      "current_supplements": [
+        {
+          "serving_per_day": 1,
+          "ingredients": [
+            {"name": "비타민 D", "amount": 400, "unit": "IU"}
+          ]
+        }
+      ],
+      "unit_cache": {"비타민D": "0.000025", "mcg": "0.001"}
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [
+        {
+          "rule": "비타민D 결핍(14.2 ng/mL) + 400IU 부분 복용 → 갭 잔존, required_nutrients에 비타민D 포함",
+          "check": "step1.required_nutrients contains '비타민 D' or '비타민D'"
+        }
+      ],
+      "must_not_occur": []
+    }
+  },
+  {
+    "case_id": "LM-002",
+    "test_focus": "IU 단위 비타민D — 고용량 단일 복용(1000IU > RDA 800IU), 갭 0 → 추가 추천 금지",
+    "description": "혈액검사 결핍이지만 현재 1000IU 복용으로 RDA 800IU 초과 충족. Lambda 갭 계산 결과 0 → step3에서 비타민D 제품 추가 추천 금지",
+    "input": {
+      "cognito_id": "test-lm-002",
+      "user_profile": {
+        "age": 35,
+        "gender": "male",
+        "medications": [],
+        "intake_purpose": ["피로 개선"]
+      },
+      "codef_health_data": {
+        "25-OH 비타민D": 14.2
+      },
+      "current_supplements": [
+        {
+          "serving_per_day": 1,
+          "ingredients": [
+            {"name": "비타민 D", "amount": 1000, "unit": "IU"}
+          ]
+        }
+      ],
+      "unit_cache": {"비타민D": "0.000025", "mcg": "0.001"}
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [],
+      "must_not_occur": [
+        {
+          "violation": "비타민D 현재 섭취(1000IU)가 RDA(800IU) 초과임에도 비타민D 제품 추가 추천",
+          "check": "step3.recommendations must NOT include '비타민D' or '비타민 D'"
+        }
+      ]
+    }
+  },
+  {
+    "case_id": "LM-003",
+    "test_focus": "serving_per_day=2 배수 반영 — 500IU × 2회 = 1000IU, 갭 0 → 추가 추천 금지",
+    "description": "1회 500IU이지만 하루 2회 복용. Lambda가 serving_per_day를 곱해 1000IU로 계산해야 함. RDA 800IU 초과 → 갭 0 → 추가 추천 금지",
+    "input": {
+      "cognito_id": "test-lm-003",
+      "user_profile": {
+        "age": 35,
+        "gender": "male",
+        "medications": [],
+        "intake_purpose": ["피로 개선"]
+      },
+      "codef_health_data": {
+        "25-OH 비타민D": 14.2
+      },
+      "current_supplements": [
+        {
+          "serving_per_day": 2,
+          "ingredients": [
+            {"name": "비타민 D", "amount": 500, "unit": "IU"}
+          ]
+        }
+      ],
+      "unit_cache": {"비타민D": "0.000025", "mcg": "0.001"}
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [],
+      "must_not_occur": [
+        {
+          "violation": "serving_per_day=2 미적용 — 500IU만 계산해 갭이 있다고 오판, 비타민D 추가 추천",
+          "check": "step3.recommendations must NOT include '비타민D' or '비타민 D'"
+        }
+      ]
+    }
+  },
+  {
+    "case_id": "LM-004",
+    "test_focus": "mcg 단위 B12 — 부분 복용(1.2mcg), 갭 잔존 → B12 추천 포함",
+    "description": "혈액검사 B12 결핍 + 현재 1.2mcg 복용. RDA 2.4mcg 대비 1.2mcg 갭 잔존 → step1에 B12 포함, step3에서 B12 보충 추천 필요",
+    "input": {
+      "cognito_id": "test-lm-004",
+      "user_profile": {
+        "age": 40,
+        "gender": "female",
+        "medications": [],
+        "intake_purpose": ["에너지 개선"]
+      },
+      "codef_health_data": {
+        "비타민B12": 150
+      },
+      "current_supplements": [
+        {
+          "serving_per_day": 1,
+          "ingredients": [
+            {"name": "비타민B12", "amount": 1.2, "unit": "mcg"}
+          ]
+        }
+      ],
+      "unit_cache": {"mcg": "0.001", "비타민D": "0.000025"}
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [
+        {
+          "rule": "B12 결핍(150 pg/mL) + 1.2mcg 부분 복용 → 갭 잔존, required_nutrients에 B12 포함",
+          "check": "step1.required_nutrients contains 'B12' or '비타민B12' or '비타민 B12'"
+        }
+      ],
+      "must_not_occur": []
+    }
+  },
+  {
+    "case_id": "LM-005",
+    "test_focus": "복수 영양제 동일 영양소 누적 합산 — 400IU + 600IU = 1000IU, 갭 0 → 추가 추천 금지",
+    "description": "두 영양제에서 비타민D를 각각 400IU, 600IU 섭취. Lambda가 누적 합산해 1000IU로 계산해야 함. RDA 800IU 초과 → 갭 0 → 추가 추천 금지",
+    "input": {
+      "cognito_id": "test-lm-005",
+      "user_profile": {
+        "age": 35,
+        "gender": "male",
+        "medications": [],
+        "intake_purpose": ["면역 강화"]
+      },
+      "codef_health_data": {
+        "25-OH 비타민D": 14.2
+      },
+      "current_supplements": [
+        {
+          "serving_per_day": 1,
+          "ingredients": [
+            {"name": "비타민 D", "amount": 400, "unit": "IU"},
+            {"name": "비타민 C", "amount": 500, "unit": "mg"}
+          ]
+        },
+        {
+          "serving_per_day": 1,
+          "ingredients": [
+            {"name": "비타민 D", "amount": 600, "unit": "IU"}
+          ]
+        }
+      ],
+      "unit_cache": {"비타민D": "0.000025", "mcg": "0.001"}
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [],
+      "must_not_occur": [
+        {
+          "violation": "복수 영양제 비타민D 누적 미합산 — 400IU + 600IU = 1000IU인데 갭 있다고 오판",
+          "check": "step3.recommendations must NOT include '비타민D' or '비타민 D'"
+        }
+      ]
+    }
+  },
+  {
+    "case_id": "LM-006",
+    "test_focus": "복합 결핍 — 비타민D 갭 잔존 + 아연 완전 충족, 선택적 추천 검증",
+    "description": "비타민D 결핍 + 아연 결핍. 아연은 이미 충분히 복용 중(15mg > RDA 10mg). Lambda 갭: 비타민D > 0, 아연 = 0. step3에서 비타민D만 추천, 아연 추가 추천 금지",
+    "input": {
+      "cognito_id": "test-lm-006",
+      "user_profile": {
+        "age": 30,
+        "gender": "male",
+        "medications": [],
+        "intake_purpose": ["면역 강화"]
+      },
+      "codef_health_data": {
+        "25-OH 비타민D": 14.2
+      },
+      "current_supplements": [
+        {
+          "serving_per_day": 1,
+          "ingredients": [
+            {"name": "아연", "amount": 15, "unit": "mg"}
+          ]
+        }
+      ],
+      "unit_cache": {"비타민D": "0.000025", "mcg": "0.001"}
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [
+        {
+          "rule": "비타민D 결핍 + 현재 미복용 → 갭 잔존, step1 required_nutrients에 비타민D 포함",
+          "check": "step1.required_nutrients contains '비타민 D' or '비타민D'"
+        }
+      ],
+      "must_not_occur": [
+        {
+          "violation": "아연 이미 충분 복용(15mg > RDA 10mg)임에도 아연 제품 추가 추천",
+          "check": "step3.recommendations must NOT include '아연'"
+        }
+      ]
+    }
+  },
+  {
+    "case_id": "LM-007",
+    "test_focus": "IU 단위 없이 mg으로만 비타민D 복용 — mg 단위 갭 계산 정확도",
+    "description": "비타민D를 mg 단위로 복용(0.01mg = 400IU 환산값). IU 변환 없이 mg 그대로 갭 계산. 0.02mg RDA 대비 0.01mg 복용 → 갭 0.01mg 잔존",
+    "input": {
+      "cognito_id": "test-lm-007",
+      "user_profile": {
+        "age": 35,
+        "gender": "male",
+        "medications": [],
+        "intake_purpose": ["피로 개선"]
+      },
+      "codef_health_data": {
+        "25-OH 비타민D": 14.2
+      },
+      "current_supplements": [
+        {
+          "serving_per_day": 1,
+          "ingredients": [
+            {"name": "비타민 D", "amount": 0.01, "unit": "mg"}
+          ]
+        }
+      ],
+      "unit_cache": {"비타민D": "0.000025", "mcg": "0.001"}
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [
+        {
+          "rule": "비타민D 0.01mg 복용 → RDA 0.02mg 대비 갭 잔존, required_nutrients에 포함",
+          "check": "step1.required_nutrients contains '비타민 D' or '비타민D'"
+        }
+      ],
+      "must_not_occur": []
+    }
+  },
+  {
+    "case_id": "LM-008",
+    "test_focus": "mcg 단위 B12 — 고용량 복용(500mcg >> RDA 2.4mcg), 갭 0 → B12 추가 추천 금지",
+    "description": "B12 결핍이지만 고용량 500mcg 복용으로 RDA 2.4mcg를 대폭 초과. Lambda 갭 = 0 → step3에서 B12 추가 추천 금지",
+    "input": {
+      "cognito_id": "test-lm-008",
+      "user_profile": {
+        "age": 40,
+        "gender": "female",
+        "medications": [],
+        "intake_purpose": ["에너지 개선"]
+      },
+      "codef_health_data": {
+        "비타민B12": 150
+      },
+      "current_supplements": [
+        {
+          "serving_per_day": 1,
+          "ingredients": [
+            {"name": "비타민B12", "amount": 500, "unit": "mcg"}
+          ]
+        }
+      ],
+      "unit_cache": {"mcg": "0.001", "비타민D": "0.000025"}
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [],
+      "must_not_occur": [
+        {
+          "violation": "B12 500mcg 복용(RDA 2.4mcg 대폭 초과)임에도 B12 추가 추천",
+          "check": "step3.recommendations must NOT include 'B12' or '비타민B12' or '비타민 B12'"
+        }
+      ]
+    }
+  }
+]

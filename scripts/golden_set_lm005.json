@@ -1,0 +1,61 @@
+[
+  {
+    "case_id": "LM-005",
+    "test_focus": "복수 영양제 동일 영양소 누적 합산 — 400IU + 600IU = 1000IU, 갭 0 → 추가 추천 금지",
+    "description": "두 영양제에서 비타민D를 각각 400IU, 600IU 섭취. Lambda가 누적 합산해 1000IU로 계산해야 함. RDA 800IU 초과 → 갭 0 → 추가 추천 금지",
+    "input": {
+      "cognito_id": "test-lm-005",
+      "user_profile": {
+        "age": 35,
+        "gender": "male",
+        "medications": [],
+        "intake_purpose": [
+          "면역 강화"
+        ]
+      },
+      "codef_health_data": {
+        "25-OH 비타민D": 14.2
+      },
+      "current_supplements": [
+        {
+          "serving_per_day": 1,
+          "ingredients": [
+            {
+              "name": "비타민 D",
+              "amount": 400,
+              "unit": "IU"
+            },
+            {
+              "name": "비타민 C",
+              "amount": 500,
+              "unit": "mg"
+            }
+          ]
+        },
+        {
+          "serving_per_day": 1,
+          "ingredients": [
+            {
+              "name": "비타민 D",
+              "amount": 600,
+              "unit": "IU"
+            }
+          ]
+        }
+      ],
+      "unit_cache": {
+        "비타민D": "0.000025",
+        "mcg": "0.001"
+      }
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [],
+      "must_not_occur": [
+        {
+          "violation": "복수 영양제 비타민D 누적 미합산 — 400IU + 600IU = 1000IU인데 갭 있다고 오판",
+          "check": "step3.recommendations must NOT include '비타민D' or '비타민 D'"
+        }
+      ]
+    }
+  }
+]

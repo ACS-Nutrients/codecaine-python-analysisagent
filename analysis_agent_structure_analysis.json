@@ -1,0 +1,669 @@
+{
+  "metadata": {
+    "report_name": "Codecaine Python Analysis Agent - 코드베이스 구조 분석",
+    "generated_at": "2026-04-01",
+    "codebase_path": "/Users/jisu/Code/ACS/PJT-3/code-total/codecaine-python-analysisagent",
+    "language": "Python",
+    "framework": "FastAPI + AWS Bedrock AgentCore"
+  },
+  "agent_overview": {
+    "name": "Analysis Agent",
+    "description": "사용자 건강 데이터 및 약물 정보 기반 영양소 분석 및 영양제 추천 에이전트",
+    "architecture_type": "Multi-Step LLM + Lambda Pipeline",
+    "deployment": "AWS Bedrock AgentCore Runtime",
+    "llm_providers": ["AWS Bedrock (production)", "Anthropic API", "OpenAI API (testing)"]
+  },
+  "input_specification": {
+    "endpoint": "POST /invocations",
+    "request_model": "AnalysisRequest",
+    "required_fields": [
+      {
+        "field_name": "cognito_id",
+        "type": "str",
+        "description": "사용자 Cognito ID (사용자 식별)",
+        "example": "user-12345"
+      }
+    ],
+    "optional_fields": [
+      {
+        "field_name": "intake_purpose",
+        "type": "str",
+        "description": "섭취 목적 (일반 분석용)",
+        "example": "피로 회복"
+      },
+      {
+        "field_name": "new_purpose",
+        "type": "str",
+        "description": "새로운 섭취 목적 (챗봇 재분석용, 없으면 previous_analysis에서 파악)"
+      },
+      {
+        "field_name": "codef_health_data",
+        "type": "dict",
+        "description": "CODEF 건강검진 JSON (혈액검사 수치)",
+        "example": {
+          "vitamin_d": 15,
+          "ferritin": 10,
+          "hemoglobin": 11.5
+        }
+      },
+      {
+        "field_name": "medication_info",
+        "type": "list[dict]",
+        "description": "복용 중인 의약품 정보 (의약품-영양소 상호작용 검색용)",
+        "example": [
+          {
+            "name": "와파린",
+            "dosage": "5mg",
+            "frequency": "1일 1회"
+          }
+        ]
+      },
+      {
+        "field_name": "current_supplements",
+        "type": "list[dict]",
+        "description": "현재 복용 중인 영양제 (갭 계산의 기준선)",
+        "example": [
+          {
+            "product_id": 1,
+            "product_name": "멀티비타민",
+            "serving_per_day": 1,
+            "ingredients": [
+              {
+                "name": "비타민 D",
+                "amount": 400
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "field_name": "unit_cache",
+        "type": "dict",
+        "description": "단위 변환 테이블 (App이 unit_convertor DB 테이블 전체 조회 후 전달)",
+        "example": {
+          "mcg": "0.001",
+          "비타민D": "0.000025",
+          "비타민A": "0.000030"
+        }
+      },
+      {
+        "field_name": "products",
+        "type": "list[dict]",
+        "description": "추천 가능한 영양제 목록 (App이 DB 조회 후 전달, Step 3에서 사용)",
+        "example": [
+          {
+            "product_id": 10,
+            "product_name": "프리미엄 비타민D",
+            "product_brand": "브랜드A",
+            "category": "일반",
+            "nutrients": [
+              {
+                "nutrient_name": "비타민 D",
+                "amount": 1000,
+                "unit": "IU"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "field_name": "user_profile",
+        "type": "dict",
+        "description": "사용자 프로필 (성별, 나이, 키, 몸무게, 알레르기, 만성질환)",
+        "example": {
+          "gender": "F",
+          "birth_dt": "1990-01-01",
+          "height": 165,
+          "weight": 55,
+          "allergies": [],
+          "chron_diseases": []
+        }
+      },
+      {
+        "field_name": "chat_history",
+        "type": "list[dict]",
+        "description": "챗봇 대화 내역 (재분석 시, 형식 미확정)",
+        "example": [
+          {
+            "role": "user",
+            "content": "피로가 심해요"
+          },
+          {
+            "role": "assistant",
+            "content": "비타민D 보충을 권장합니다"
+          }
+        ]
+      },
+      {
+        "field_name": "previous_analysis",
+        "type": "dict",
+        "description": "이전 분석 결과 (재분석 시 맥락 유지, step1/step2/step3 포함)"
+      }
+    ]
+  },
+  "output_specification": {
+    "response_model": "AnalysisResponse",
+    "structure": {
+      "cognito_id": "str",
+      "step1": {
+        "model": "Step1Result",
+        "fields": {
+          "required_nutrients": {
+            "type": "list[RequiredNutrient]",
+            "description": "필요한 영양소 목록"
+          },
+          "summary": {
+            "type": "AnalysisSummary",
+            "description": "전반적 영양 상태 평가 및 조언"
+          }
+        }
+      },
+      "step2": {
+        "model": "Step2Result",
+        "fields": {
+          "gaps": {
+            "type": "list[NutrientGapItem]",
+            "description": "영양소 부족분 (mg 단위로 정규화)"
+          }
+        }
+      },
+      "step3": {
+        "model": "Step3Result",
+        "fields": {
+          "recommendations": {
+            "type": "list[RecommendationItem]",
+            "description": "추천 영양제 (최대 5개, 순위 포함)"
+          }
+        }
+      }
+    },
+    "detailed_models": {
+      "RequiredNutrient": {
+        "name_ko": "str (영양소명 한글)",
+        "name_en": "str | None (영양소명 영문)",
+        "rda_amount": "Decimal (권장 섭취량)",
+        "unit": "str (단위: IU, mg, mcg 등)",
+        "reason": "str (추천 이유)"
+      },
+      "AnalysisSummary": {
+        "overall_assessment": "str (7문장 이상, 검진 수치 포함, 공감 어조)",
+        "key_concerns": "list[str] (약물 상호작용, 영양소 결핍 우려)",
+        "lifestyle_notes": "LifestyleNotes (식이, 운동, 수면, 복용 타이밍)",
+        "risk_warnings": "list[str] (의약품 상호작용 경고)"
+      },
+      "LifestyleNotes": {
+        "diet": "str (식품 예시 포함)",
+        "exercise": "str (운동 종류·빈도)",
+        "sleep": "str (수면과 영양소 연관성)",
+        "supplement_timing": "str (영양제 복용 타이밍)"
+      },
+      "NutrientGapItem": {
+        "nutrient_id": "int | None",
+        "name_ko": "str",
+        "name_en": "str | None",
+        "unit": "str (항상 'mg'으로 정규화)",
+        "current_amount": "str (현재 섭취량 mg)",
+        "gap_amount": "str (부족한 양 mg)",
+        "rda_amount": "str (권장량 mg)"
+      },
+      "RecommendationItem": {
+        "rank": "int (1-5)",
+        "product_id": "int",
+        "product_name": "str",
+        "product_brand": "str",
+        "recommend_serving": "int (복용량)",
+        "serving_per_day": "int | None (일일 복용 횟수)",
+        "covered_nutrients": "list[str] (커버하는 영양소)"
+      }
+    }
+  },
+  "internal_architecture": {
+    "pipeline": "3단계 LLM+Lambda 파이프라인",
+    "steps": [
+      {
+        "step_number": 1,
+        "name": "LLM 분석 - 필요 영양소 도출",
+        "components": [
+          "KB 검색 (의약품-영양소 상호작용)",
+          "프롬프트 구성",
+          "LLM 호출",
+          "JSON 파싱"
+        ],
+        "output": {
+          "required_nutrients": "필요 영양소 목록",
+          "summary": "평가, 우려사항, 조언, 경고"
+        },
+        "file": "/app/services/analysis_agent.py (line 173-194)",
+        "system_prompt": "SYSTEM_PROMPT_STEP1",
+        "kb_integrated": true,
+        "duration_sec": "2-3초"
+      },
+      {
+        "step_number": 2,
+        "name": "Lambda 갭 계산",
+        "components": [
+          "섭취량 집계",
+          "단위 변환 (IU/mcg → mg)",
+          "갭 계산"
+        ],
+        "output": {
+          "gaps": "영양소별 부족분 (mg 단위)"
+        },
+        "file": "/lambdas/action_nutrient_calc/handler.py",
+        "function": "lambda_handler()",
+        "duration_sec": "0.5-1초"
+      },
+      {
+        "step_number": 3,
+        "name": "LLM 추천 - 영양제 선택",
+        "components": [
+          "프롬프트 구성 (갭 + 제품 목록)",
+          "LLM 호출",
+          "JSON 파싱"
+        ],
+        "output": {
+          "recommendations": "최대 5개 영양제, 순위 포함"
+        },
+        "file": "/app/services/analysis_agent.py (line 206-214)",
+        "system_prompt": "SYSTEM_PROMPT_STEP3",
+        "duration_sec": "1-2초"
+      }
+    ]
+  },
+  "data_sources": {
+    "codef_health_data": {
+      "type": "혈액검사 수치",
+      "source": "CODEF API",
+      "usage": "Step 1 LLM 프롬프트 입력",
+      "example_fields": ["vitamin_d", "ferritin", "hemoglobin"]
+    },
+    "medication_info": {
+      "type": "의약품 정보",
+      "source": "앱 요청 payload",
+      "usage": "KB 검색 쿼리, Step 1 프롬프트 입력",
+      "example": [{"name": "약물명", "dosage": "용량", "frequency": "복용 빈도"}]
+    },
+    "current_supplements": {
+      "type": "현재 복용 영양제",
+      "source": "앱 DB 조회",
+      "usage": "Step 2 갭 계산 기준선",
+      "structure": {
+        "product_id": "int",
+        "product_name": "str",
+        "serving_per_day": "int",
+        "ingredients": [{"name": "str", "amount": "decimal"}]
+      }
+    },
+    "unit_cache": {
+      "type": "단위 변환 테이블",
+      "source": "앱이 unit_convertor DB 테이블 전체 조회",
+      "usage": "Step 2 IU/mcg → mg 변환",
+      "example": {"mcg": "0.001", "비타민D": "0.000025"}
+    },
+    "products": {
+      "type": "영양제 제품 목록",
+      "source": "앱이 DB 조회 (products + product_nutrients)",
+      "usage": "Step 3 LLM 추천 (제공 목록 내에서만 추천)",
+      "constraint": "이 목록에서만 추천 가능 (임의 생성 금지)"
+    },
+    "user_profile": {
+      "type": "사용자 프로필",
+      "source": "앱 DB 조회",
+      "fields": ["gender", "birth_dt", "height", "weight", "allergies", "chron_diseases"],
+      "usage": "Step 1 나이/성별 기반 KDRI, Step 3 성별별 제품 추천"
+    },
+    "knowledge_base": {
+      "type": "의약품-영양소 상호작용 KB",
+      "files": ["lpi_kb.npz (벡터)", "lpi_kb_texts.json (원문)"],
+      "size_chunks": 252,
+      "embedding_dim": 1536,
+      "embedding_model": "global.cohere.embed-v4:0 (AWS Bedrock)",
+      "usage": "Step 1 KB 검색 (의약품 상호작용 정보 주입)",
+      "search_method": "cosine similarity (Top-K=3)"
+    }
+  },
+  "core_files": {
+    "service_files": [
+      {
+        "file": "/app/services/analysis_agent.py",
+        "type": "Main Agent Logic",
+        "description": "3단계 파이프라인 조율, LLM 호출, 프롬프트 구성",
+        "classes": ["AnalysisAgent"],
+        "methods": [
+          "run(req: AnalysisRequest) -> AnalysisResponse",
+          "_call_llm(system, user) -> str",
+          "_call_openai(system, user) -> str",
+          "_call_anthropic(system, user) -> str",
+          "_call_bedrock(system, user) -> str",
+          "_call_lambda(...) -> list[dict]",
+          "_build_step1_prompt(req) -> str",
+          "_build_step3_prompt(gaps, products) -> str",
+          "_parse_json(text) -> dict"
+        ],
+        "key_constants": [
+          "SYSTEM_PROMPT_STEP1 (영양소 분석 지침)",
+          "SYSTEM_PROMPT_STEP3 (영양제 추천 지침)"
+        ]
+      },
+      {
+        "file": "/app/services/kb_retriever.py",
+        "type": "Knowledge Base Search",
+        "description": "의약품-영양소 상호작용 KB 검색",
+        "functions": [
+          "retrieve(query: str) -> str",
+          "retrieve_drug_interactions(medications, nutrients) -> str",
+          "_embed_query(text: str) -> np.ndarray",
+          "_get_kb() -> tuple"
+        ],
+        "details": "Cohere Bedrock 임베딩 + cosine similarity"
+      },
+      {
+        "file": "/app/api/routes/invocations.py",
+        "type": "FastAPI Endpoint",
+        "description": "POST /invocations 엔드포인트",
+        "endpoint": "POST /invocations",
+        "request": "AnalysisRequest",
+        "response": "AnalysisResponse (JSON)"
+      }
+    ],
+    "lambda_files": [
+      {
+        "file": "/lambdas/action_nutrient_calc/handler.py",
+        "type": "Lambda Function",
+        "description": "영양소 갭 계산 (단위 변환 포함)",
+        "function": "lambda_handler(event, context) -> dict",
+        "helpers": [
+          "build_intake_map(supplements) -> dict",
+          "to_mg(amount, unit, unit_cache, nutrient_name) -> Decimal"
+        ]
+      }
+    ],
+    "schema_files": [
+      {
+        "file": "/app/schemas/analysis.py",
+        "type": "Data Models",
+        "models": [
+          "AnalysisRequest",
+          "AnalysisResponse",
+          "Step1Result",
+          "Step2Result",
+          "Step3Result",
+          "RequiredNutrient",
+          "AnalysisSummary",
+          "LifestyleNotes",
+          "NutrientGapItem",
+          "RecommendationItem"
+        ]
+      }
+    ],
+    "config_files": [
+      {
+        "file": "/app/core/config.py",
+        "type": "Configuration",
+        "settings": [
+          "AWS_REGION",
+          "LLM_PROVIDER (bedrock/anthropic/openai)",
+          "BEDROCK_MODEL_ID",
+          "ANTHROPIC_MODEL_ID",
+          "OPENAI_MODEL_ID",
+          "LAMBDA_FUNCTION_NAME",
+          "KB_LOCAL_PATH",
+          "KB_TOP_K"
+        ]
+      }
+    ],
+    "data_files": [
+      {
+        "file": "lpi_kb.npz",
+        "size_kb": 920,
+        "description": "임베딩 벡터 (252개 청크 × 1536차원, float32)",
+        "usage": "KB 검색 (cosine similarity)"
+      },
+      {
+        "file": "lpi_kb_texts.json",
+        "size_kb": 224,
+        "description": "KB 청크 원문 + 메타데이터",
+        "usage": "검색 결과 텍스트 추출"
+      }
+    ]
+  },
+  "unit_conversion_logic": {
+    "description": "IU/mcg → mg 변환 (Step 2 Lambda)",
+    "rules": [
+      {
+        "unit": "mg",
+        "conversion": "그대로 (1x)"
+      },
+      {
+        "unit": "mcg / µg / μg",
+        "conversion": "× unit_cache['mcg'] (기본값: 0.001)",
+        "example": "100 mcg = 100 × 0.001 = 0.1 mg"
+      },
+      {
+        "unit": "IU",
+        "conversion": "× unit_cache[nutrient_name_ko] (영양소별 상이)",
+        "example": {
+          "비타민D": "1000 IU × 0.000025 = 0.025 mg",
+          "비타민A": "1000 IU × 0.000030 = 0.030 mg"
+        }
+      }
+    ],
+    "implementation": "/lambdas/action_nutrient_calc/handler.py - to_mg() 함수"
+  },
+  "llm_providers": {
+    "description": "LLM_PROVIDER 환경변수로 전환 가능",
+    "providers": [
+      {
+        "name": "AWS Bedrock",
+        "env_value": "bedrock",
+        "environment": "Production",
+        "model": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+        "config_key": "BEDROCK_MODEL_ID"
+      },
+      {
+        "name": "Anthropic API",
+        "env_value": "anthropic",
+        "environment": "Testing",
+        "model": "claude-sonnet-4-5",
+        "requires_api_key": "ANTHROPIC_API_KEY",
+        "config_key": "ANTHROPIC_MODEL_ID"
+      },
+      {
+        "name": "OpenAI API",
+        "env_value": "openai",
+        "environment": "Testing",
+        "model": "gpt-4o",
+        "requires_api_key": "OPENAI_API_KEY",
+        "config_key": "OPENAI_MODEL_ID"
+      }
+    ],
+    "implementation": "/app/services/analysis_agent.py - _call_llm() 메서드"
+  },
+  "metrics_collected": {
+    "description": "Prometheus 메트릭 수집 (/app/metrics.py)",
+    "metrics": [
+      {
+        "name": "agent_invocation_counter",
+        "type": "Counter",
+        "attributes": ["status: success/error"],
+        "description": "에이전트 호출 횟수"
+      },
+      {
+        "name": "agent_latency_histogram",
+        "type": "Histogram",
+        "description": "에이전트 응답 시간 (초)"
+      },
+      {
+        "name": "tool_execution_counter",
+        "type": "Counter",
+        "attributes": ["tool_name: kb, step1_llm, step3_llm, nutrient_calc", "status"],
+        "description": "각 도구별 실행 횟수"
+      },
+      {
+        "name": "tool_duration_histogram",
+        "type": "Histogram",
+        "attributes": ["tool_name"],
+        "description": "각 도구별 실행 시간"
+      },
+      {
+        "name": "agent_token_input_counter",
+        "type": "Counter",
+        "attributes": ["model_id"],
+        "description": "LLM 입력 토큰 합계"
+      },
+      {
+        "name": "agent_token_output_counter",
+        "type": "Counter",
+        "attributes": ["model_id"],
+        "description": "LLM 출력 토큰 합계"
+      },
+      {
+        "name": "kb_context_counter",
+        "type": "Counter",
+        "attributes": ["status: hit/miss"],
+        "description": "KB 검색 hit/miss"
+      },
+      {
+        "name": "kb_chunks_retrieved_counter",
+        "type": "Counter",
+        "description": "검색된 KB 청크 수"
+      }
+    ]
+  },
+  "key_business_rules": {
+    "step1_analysis": {
+      "title": "필요 영양소 분석 기준",
+      "rules": [
+        "건강검진 수치 중 저/고/경계값 항목 파악",
+        "의약품-영양소 상호작용 검토 (KB 기반)",
+        "섭취 목적에 맞는 영양소 우선 제안",
+        "한국 영양소 기준 섭취량(KDRI) 기반",
+        "약물 상호작용 주의 영양소 → required_nutrients 제외, key_concerns에 명시",
+        "재분석 시: new_purpose 우선, 없으면 previous_analysis에서 파악"
+      ]
+    },
+    "step1_summary": {
+      "title": "평가(summary) 작성 지침",
+      "rules": [
+        "overall_assessment: 7문장 이상, 검진 수치 구체적 언급, 공감 어조, 긍정적 메시지",
+        "key_concerns: '[약물명] 복용 중 [영양소] [구체적 주의내용]' 형식 (뭉뚱그린 표현 금지)",
+        "lifestyle_notes: 식품 예시, 운동 빈도, 수면-영양소 연관성, 복용 타이밍 포함",
+        "risk_warnings: 의약품 상호작용/과잉섭취 경고 (없으면 빈 배열)"
+      ]
+    },
+    "step3_recommendation": {
+      "title": "영양제 추천 기준",
+      "rules": [
+        "제공된 제품 목록에서만 추천 (임의 생성 금지)",
+        "부족한 영양소 커버율 높은 제품 우선",
+        "성별별 우선순위: 여성용 → 여성 우선, 남성용 → 남성 우선",
+        "serving_per_day 낮을수록 우선 (복용 편의성)",
+        "max_amount 초과 위험 제품 하위 순위",
+        "최대 5개 추천"
+      ]
+    }
+  },
+  "error_handling": {
+    "json_parsing_failure": {
+      "description": "LLM 응답 JSON 파싱 실패",
+      "handling": "logger.error 후 ValueError 발생",
+      "implementation": "_parse_json() 메서드",
+      "recovery": "API는 HTTP 422 또는 500 응답"
+    },
+    "kb_search_failure": {
+      "description": "KB 검색 실패",
+      "handling": "logger.warning 후 빈 문자열 반환 (KB 없이 진행)",
+      "implementation": "retrieve() 함수 try-except"
+    },
+    "lambda_invocation_failure": {
+      "description": "Lambda 함수 호출 실패",
+      "handling": "Exception 발생 (API는 HTTP 500 응답)",
+      "implementation": "_call_lambda() 메서드"
+    },
+    "unit_conversion_failure": {
+      "description": "unit_cache에 없는 단위/영양소",
+      "handling": "logger.warning 후 amount 그대로 사용",
+      "implementation": "to_mg() 함수"
+    }
+  },
+  "performance_characteristics": {
+    "step_timing": [
+      {
+        "step": "Step 1 (KB + LLM)",
+        "duration_sec": "2-3",
+        "bottleneck": "LLM API 응답시간"
+      },
+      {
+        "step": "Step 2 (Lambda)",
+        "duration_sec": "0.5-1",
+        "bottleneck": "Lambda cold start (처음)"
+      },
+      {
+        "step": "Step 3 (LLM)",
+        "duration_sec": "1-2",
+        "bottleneck": "LLM API 응답시간"
+      },
+      {
+        "step": "Total",
+        "duration_sec": "5-10",
+        "note": "병렬화 미지원 (순차 실행)"
+      }
+    ],
+    "data_size": {
+      "input_payload_typical_kb": 50,
+      "output_payload_typical_kb": 30,
+      "kb_vector_memory_mb": "1.4",
+      "kb_text_memory_mb": "0.23"
+    }
+  },
+  "deployment_requirements": {
+    "aws_permissions": [
+      {
+        "service": "bedrock-agentcore",
+        "action": "InvokeAgentRuntime",
+        "resource": "arn:aws:bedrock-agentcore:ap-northeast-2:070238434919:runtime/*"
+      },
+      {
+        "service": "bedrock-runtime",
+        "action": "InvokeModel",
+        "resource": "*",
+        "purpose": "LLM 호출 + KB 임베딩"
+      },
+      {
+        "service": "lambda",
+        "action": "InvokeFunction",
+        "resource": "arn:aws:lambda:ap-northeast-2:*:function:action-nutrient-calc"
+      }
+    ],
+    "environment_variables": [
+      "AWS_REGION (기본: ap-northeast-2)",
+      "LLM_PROVIDER (bedrock/anthropic/openai)",
+      "ANTHROPIC_API_KEY (anthropic 사용 시)",
+      "OPENAI_API_KEY (openai 사용 시)"
+    ],
+    "container": "Dockerfile 제공 (FastAPI)"
+  },
+  "extensibility": {
+    "add_new_llm_provider": {
+      "steps": [
+        "config.py에 설정 추가",
+        "analysis_agent.py에 _call_new_llm() 메서드 구현",
+        "_call_llm()에 분기 추가"
+      ]
+    },
+    "update_knowledge_base": {
+      "steps": [
+        "새로운 의약품-영양소 상호작용 정보 수집",
+        "lpi_kb.npz, lpi_kb_texts.json 재생성",
+        "컨테이너 이미지 재빌드 후 배포"
+      ]
+    },
+    "modify_prompts": {
+      "steps": [
+        "SYSTEM_PROMPT_STEP1 또는 SYSTEM_PROMPT_STEP3 수정",
+        "코드 재배포",
+        "또는: 환경변수로 프롬프트 관리 (배포 회피 가능)"
+      ]
+    }
+  }
+}

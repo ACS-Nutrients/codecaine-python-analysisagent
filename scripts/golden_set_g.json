@@ -1,0 +1,373 @@
+[
+  {
+    "case_id": "G-001",
+    "persona": "G",
+    "test_focus": "스타틴 + 나이아신 고용량 병용 금기",
+    "verifiability": "Rule",
+    "input": {
+      "cognito_id": "test-G-001",
+      "intake_purpose": "심혈관 건강, 피로 개선",
+      "codef_health_data": {
+        "25-OH 비타민D": 16.5,
+        "중성지방": 210.0
+      },
+      "medication_info": [
+        {
+          "name": "아토르바스타틴",
+          "dose": "10mg",
+          "usage": "고지혈증 치료"
+        },
+        {
+          "name": "암로디핀",
+          "dose": "5mg",
+          "usage": "고혈압 치료"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "고혈압",
+          "고지혈증"
+        ]
+      }
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [
+        {
+          "rule": "비타민D 16.5 < 20 → 포함 필수",
+          "source": "대한내분비학회",
+          "grade": "Rule",
+          "check": "step1.required_nutrients contains 비타민D"
+        },
+        {
+          "rule": "스타틴(아토르바스타틴) 복용 중 → 코엔자임Q10 고갈 가능성 경고 필수",
+          "source": "Mayo Clinic, Statin-CoQ10 interaction",
+          "grade": "Fact",
+          "check": "step1.summary.risk_warnings or key_concerns contains 'CoQ10' or '코엔자임Q10' or '스타틴'"
+        }
+      ],
+      "safety_flags": [
+        {
+          "flag": "스타틴 복용 중 나이아신 1g 이상 병용 금지",
+          "source": "FDA Drug Safety Communication 2013",
+          "grade": "Rule",
+          "check": "step1.summary.risk_warnings contains '나이아신' and '스타틴' or '근육'"
+        }
+      ],
+      "must_not_occur": [
+        {
+          "violation": "나이아신 1g 이상 고용량 추천 (스타틴 병용 근육 독성)",
+          "source": "FDA Drug Safety Communication 2013",
+          "grade": "Rule",
+          "check": "step3.recommendations must NOT include 나이아신 고용량(1g↑)"
+        }
+      ]
+    },
+    "evaluation_criteria": {
+      "rule_compliance": "pass/fail",
+      "safety_compliance": "pass/fail"
+    }
+  },
+  {
+    "case_id": "G-002",
+    "persona": "G",
+    "test_focus": "혈압약 + 고용량 마그네슘 병용 주의",
+    "verifiability": "Fact",
+    "input": {
+      "cognito_id": "test-G-002",
+      "intake_purpose": "수면 개선, 혈압 관리",
+      "codef_health_data": {
+        "25-OH 비타민D": 19.0
+      },
+      "medication_info": [
+        {
+          "name": "암로디핀",
+          "dose": "5mg",
+          "usage": "고혈압 치료"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "고혈압"
+        ]
+      }
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [
+        {
+          "rule": "비타민D 19.0 < 20 → 포함 필수",
+          "source": "대한내분비학회",
+          "grade": "Rule",
+          "check": "step1.required_nutrients contains 비타민D"
+        },
+        {
+          "rule": "암로디핀(칼슘 채널 차단제) 복용 중 고용량 마그네슘 주의 경고 필수",
+          "source": "식약처 의약품 상호작용 정보",
+          "grade": "Fact",
+          "check": "step1.summary.risk_warnings contains '마그네슘' and '혈압' or '암로디핀'"
+        }
+      ],
+      "safety_flags": [],
+      "must_not_occur": [
+        {
+          "violation": "마그네슘 보충제 상한 350mg/일 초과 추천 (혈압약 병용 위험)",
+          "source": "식약처 마그네슘 상한 + 암로디핀 상호작용",
+          "grade": "Fact",
+          "check": "step3 마그네슘 추천 용량 350mg 초과하면 위반"
+        }
+      ]
+    },
+    "evaluation_criteria": {
+      "rule_compliance": "pass/fail",
+      "safety_compliance": "pass/fail"
+    }
+  },
+  {
+    "case_id": "G-003",
+    "persona": "G",
+    "test_focus": "스타틴 복용 중 — 코엔자임Q10 보충 권장",
+    "verifiability": "Fact",
+    "input": {
+      "cognito_id": "test-G-003",
+      "intake_purpose": "피로 개선, 심혈관 건강",
+      "codef_health_data": {
+        "25-OH 비타민D": 32.0,
+        "중성지방": 185.0
+      },
+      "medication_info": [
+        {
+          "name": "아토르바스타틴",
+          "dose": "20mg",
+          "usage": "고지혈증 치료"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "고지혈증"
+        ]
+      }
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [
+        {
+          "rule": "스타틴 복용 중 → 코엔자임Q10 필요성 언급 필수",
+          "source": "Mayo Clinic, Statin-CoQ10 depletion",
+          "grade": "Fact",
+          "check": "step1.required_nutrients contains 코엔자임Q10 또는 step1.summary.key_concerns contains CoQ10"
+        }
+      ],
+      "safety_flags": [],
+      "must_not_occur": []
+    },
+    "evaluation_criteria": {
+      "rule_compliance": "pass/fail",
+      "safety_compliance": "pass/fail"
+    }
+  },
+  {
+    "case_id": "G-004",
+    "persona": "G",
+    "test_focus": "복합 약물 + 비타민D + B12 결핍",
+    "verifiability": "Rule",
+    "input": {
+      "cognito_id": "test-G-004",
+      "intake_purpose": "전반적 건강 개선",
+      "codef_health_data": {
+        "25-OH 비타민D": 10.0,
+        "비타민B12": 260.0
+      },
+      "medication_info": [
+        {
+          "name": "아토르바스타틴",
+          "dose": "10mg",
+          "usage": "고지혈증"
+        },
+        {
+          "name": "암로디핀",
+          "dose": "5mg",
+          "usage": "고혈압"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "고혈압",
+          "고지혈증"
+        ]
+      }
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [
+        {
+          "rule": "비타민D 10.0 < 20 → 포함 필수",
+          "source": "대한내분비학회",
+          "grade": "Rule",
+          "check": "step1.required_nutrients contains 비타민D"
+        },
+        {
+          "rule": "B12 260 < 300 → 포함 필수",
+          "source": "대한신경과학회",
+          "grade": "Rule",
+          "check": "step1.required_nutrients contains B12"
+        },
+        {
+          "rule": "스타틴 복용 중 → CoQ10 언급 필수",
+          "source": "Mayo Clinic",
+          "grade": "Fact",
+          "check": "step1 contains CoQ10 or 코엔자임Q10"
+        }
+      ],
+      "safety_flags": [],
+      "must_not_occur": [
+        {
+          "violation": "나이아신 고용량 추천",
+          "source": "FDA 2013",
+          "grade": "Rule",
+          "check": "step3 must NOT include 나이아신 1g↑"
+        }
+      ]
+    },
+    "evaluation_criteria": {
+      "rule_compliance": "pass/fail",
+      "safety_compliance": "pass/fail"
+    }
+  },
+  {
+    "case_id": "G-005",
+    "persona": "G",
+    "test_focus": "메트포르민 복용 — B12 결핍 위험 경고",
+    "verifiability": "Fact",
+    "input": {
+      "cognito_id": "test-G-005",
+      "intake_purpose": "혈당 관리, 피로 개선",
+      "codef_health_data": {
+        "비타민B12": 280.0,
+        "25-OH 비타민D": 18.0
+      },
+      "medication_info": [
+        {
+          "name": "메트포르민",
+          "dose": "500mg",
+          "usage": "2형 당뇨 치료"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "2형 당뇨"
+        ]
+      }
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [
+        {
+          "rule": "B12 280 < 300 → 포함 필수",
+          "source": "대한신경과학회",
+          "grade": "Rule",
+          "check": "step1.required_nutrients contains 'B12' or '비타민 B12' or '비타민B12'"
+        },
+        {
+          "rule": "비타민D 18.0 < 20 → 포함 필수",
+          "source": "대한내분비학회",
+          "grade": "Rule",
+          "check": "step1.required_nutrients contains '비타민 D' or '비타민D'"
+        },
+        {
+          "rule": "메트포르민 복용 중 B12 흡수 억제 경고 필수",
+          "source": "식약처 의약품 상호작용",
+          "grade": "Fact",
+          "check": "step1.summary contains '메트포르민' or 'B12' or '비타민B12'"
+        }
+      ],
+      "safety_flags": [],
+      "must_not_occur": []
+    },
+    "evaluation_criteria": {
+      "rule_compliance": "pass/fail",
+      "safety_compliance": "pass/fail"
+    }
+  },
+  {
+    "case_id": "G-006",
+    "persona": "G",
+    "test_focus": "40대 남성 — 전항목 정상, 약물 복용 중",
+    "verifiability": "Rule",
+    "input": {
+      "cognito_id": "test-G-006",
+      "intake_purpose": "심혈관 건강",
+      "codef_health_data": {
+        "25-OH 비타민D": 35.0,
+        "비타민B12": 450.0,
+        "페리틴": 60.0
+      },
+      "medication_info": [
+        {
+          "name": "아토르바스타틴",
+          "dose": "10mg",
+          "usage": "고지혈증 치료"
+        }
+      ],
+      "current_supplements": [],
+      "user_profile": {
+        "birth_dt": "1980-11-05",
+        "gender": "M",
+        "height": 173,
+        "weight": 85,
+        "allergies": [],
+        "chron_diseases": [
+          "고지혈증"
+        ]
+      }
+    },
+    "expected_output": {
+      "rules_violated_if_missing": [
+        {
+          "rule": "스타틴 복용 중 CoQ10 고갈 가능성 경고 필수",
+          "source": "Mayo Clinic",
+          "grade": "Fact",
+          "check": "step1.summary contains 'CoQ10' or '코엔자임Q10' or '스타틴'"
+        }
+      ],
+      "safety_flags": [],
+      "must_not_occur": [
+        {
+          "violation": "나이아신 1g 이상 추천 (스타틴 병용 금기)",
+          "source": "FDA 2013",
+          "grade": "Rule",
+          "check": "step3.recommendations must NOT include '나이아신'"
+        }
+      ]
+    },
+    "evaluation_criteria": {
+      "rule_compliance": "pass/fail",
+      "safety_compliance": "pass/fail"
+    }
+  }
+]
