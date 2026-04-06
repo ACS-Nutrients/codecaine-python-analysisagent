@@ -82,7 +82,7 @@ def extract_claims(agent_output: dict) -> list[str]:
 
     for nutrient in step1.get("required_nutrients", []) or []:
         reason = str(nutrient.get("reason", ""))
-        if "[약물 상호작용]" in reason or "[혈액검사 근거]" in reason:
+        if "[약물 상호작용]" in reason:
             claims.append(f"{nutrient.get('name_ko', '')}: {reason}")
 
     return claims
@@ -321,7 +321,7 @@ def main():
     print("KB 임베딩 캐시 생성 중...")
     kb_doc_vecs = None
     try:
-        kb_doc_vecs = embed_texts(kb_docs, bedrock, input_type="search_document")
+        kb_doc_vecs = embed_texts(kb_docs, bedrock, input_type="search_query")
         print(f"KB 임베딩 완료: {len(kb_doc_vecs)}개")
     except Exception as e:
         print(f"[WARN] KB 임베딩 사전 생성 실패: {e}")
